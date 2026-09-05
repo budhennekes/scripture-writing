@@ -26,7 +26,8 @@ try {
  assert.match(await page.$eval('.verse.active p',e=>e.textContent),/God so loved the world/)
  for (const id of ['BSB','ASV1901','WEB']) {
   await page.select('select[aria-label="Bible translation"]',id)
-  await page.waitForFunction(id=>document.querySelector('select[aria-label="Bible translation"]')?.value===id && document.querySelector('.verse.active'),{},id)
+  const names={WEB:'World English Bible',BSB:'Berean Standard Bible',ASV1901:'American Standard Version (1901)'}
+  await page.waitForFunction(({id,name})=>document.querySelector('select[aria-label="Bible translation"]')?.value===id && document.querySelector('.chapter-kicker')?.textContent.includes(name) && document.querySelector('.verse.active'),{},{id,name:names[id]})
   assert.match(await page.$eval('.verse.active p',e=>e.textContent),/God so loved the world/)
  }
  await page.evaluate(()=>[...document.querySelectorAll('button')].find(b=>b.textContent==='Focus').click())
