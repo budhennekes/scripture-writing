@@ -1,0 +1,70 @@
+# The writing room
+
+A simple web companion for handwriting Scripture. No account, backend profile, analytics, or subscription.
+
+## Use it
+
+Public MVP: https://budhennekes.github.io/scripture-writing/
+
+- Choose WEB, Berean Standard Bible (BSB), or American Standard Version (1901).
+- Enter a passage such as `John 3:16`, or browse by book, chapter, and verse.
+- Write on paper. Use Space, arrows, or the large Next control to advance.
+- Choose your writing hand in settings to position controls on the other side.
+- Turn on Focus to reduce distractions. Turn on Line guide and click a line to mark your place.
+- Adjust type size and light/dark appearance in settings.
+
+Your place and bookmarks are stored in this browser, separately for each translation. They do not sync between devices; clearing browser storage removes them. Moving from the local prototype to the public URL does not transfer local saves. Focus and line guide are session controls. Offline support is available after a successful online load and service-worker installation. Browser support for fullscreen and screen wake lock varies.
+
+All bundled editions contain the 66-book Protestant canon. They do not include Deuterocanonical books. Verse numbering can differ between translations; the app uses reference-based positions rather than assuming matching array offsets.
+
+## Development
+
+```sh
+npm ci
+npm run dev
+```
+
+For production preview and checks:
+
+```sh
+npm run build
+npm run preview -- --host 127.0.0.1 --port 4173
+# In another terminal:
+npm run lint
+npm run qa
+node scripts/mvp_qa.mjs
+node scripts/readability_qa.mjs
+node scripts/design_matrix.mjs
+node scripts/persistence_qa.mjs
+node scripts/release_qa.mjs
+python3 scripts/data_qa.py
+```
+
+Browser tests use an isolated headless Google Chrome instance. The release test also supports `QA_URL` and `CHROME_PATH`.
+
+## Public deployment
+
+Source lives on `main`; compiled static assets are deployed to `gh-pages`. Publishing requires repository access and explicit approval.
+
+```sh
+DEPLOY_BASE=/scripture-writing/ npm run build
+python3 scripts/deploy_pages.py
+QA_URL=https://budhennekes.github.io/scripture-writing/ node scripts/release_qa.mjs
+```
+
+GitHub Pages must serve `gh-pages` from `/`. Do not deploy `.env` files, browser data, source downloads, or QA artifacts.
+
+## Bible sources and permissions
+
+- **World English Bible**: https://ebible.org/engwebp/ — public domain. “World English Bible” is a trademark of eBible.org.
+- **American Standard Version (1901)**: https://ebible.org/asv/copyright.htm — public domain.
+- **Berean Standard Bible**: https://berean.bible/terms.htm — dedicated to the public domain (CC0). Produced in cooperation with Bible Hub, Discovery Bible, OpenBible.com, and the Berean Bible Translation Committee.
+
+Data comes from official eBible.org USFX downloads. Footnotes and editorial headings are excluded from the copying text. To regenerate:
+
+```sh
+python3 scripts/build_bible.py WEB
+python3 scripts/build_bible.py ASV1901
+python3 scripts/build_bible.py BSB
+python3 scripts/data_qa.py
+```

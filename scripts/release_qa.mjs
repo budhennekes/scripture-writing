@@ -1,0 +1,52 @@
+import puppeteer from 'puppeteer-core'
+import assert from 'node:assert/strict'
+import { mkdir } from 'node:fs/promises'
+const url=process.env.QA_URL || 'http://127.0.0.1:4173/'
+const browser=await puppeteer.launch({executablePath:process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true})
+try {
+ const page=await browser.newPage(); const errors=[];const failures=[]
+ page.on('pageerror',e=>errors.push(e.message))
+ page.on('response',r=>{if(r.status()>=400)failures.push(`${r.status()} ${r.url()}`)})
+ await page.setViewport({width:1440,height:960})
+ await page.goto(url,{waitUntil:'networkidle0'})
+ await page.waitForSelector('.verse.active',{timeout:30000})
+ assert.match(await page.$eval('.verse.active p',e=>e.textContent),/In the beginning/)
+ await page.keyboard.press('Space')
+ await page.waitForFunction(()=>document.querySelector('.passage-button')?.textContent.includes('1:2'))
+ await page.reload({waitUntil:'networkidle0'})
+ await page.waitForFunction(()=>document.querySelector('.passage-button')?.textContent.includes('1:2'))
+ await page.click('.bookmark-button')
+ await page.waitForSelector('.bookmark-button.selected')
+ await page.click('.passage-button')
+ await page.waitForSelector('input[name="reference"]')
+ await page.type('input[name="reference"]','John 3:16')
+ await page.waitForFunction(()=>document.querySelector('.reference-result strong')?.textContent==='John 3:16')
+ await page.keyboard.press('Enter')
+ await page.waitForFunction(()=>document.querySelector('.passage-button')?.textContent.includes('3:16'))
+ assert.match(await page.$eval('.verse.active p',e=>e.textContent),/God so loved the world/)
+ for (const id of ['BSB','ASV1901','WEB']) {
+  await page.select('select[aria-label="Bible translation"]',id)
+  await page.waitForFunction(id=>document.querySelector('select[aria-label="Bible translation"]')?.value===id && document.querySelector('.verse.active'),{},id)
+  assert.match(await page.$eval('.verse.active p',e=>e.textContent),/God so loved the world/)
+ }
+ await page.evaluate(()=>[...document.querySelectorAll('button')].find(b=>b.textContent==='Focus').click())
+ assert.ok(await page.$('.focus-writing'))
+ assert.equal(await page.$eval('.chapter-label',e=>getComputedStyle(e).display),'none')
+ await page.evaluate(()=>[...document.querySelectorAll('button')].find(b=>b.textContent==='Line guide').click())
+ await page.click('.guided-text')
+ assert.notEqual(await page.$eval('.guided-text',e=>getComputedStyle(e).backgroundImage),'none')
+ await page.evaluate(()=>[...document.querySelectorAll('button')].find(b=>b.textContent==='Focus' || b.textContent==='Exit focus').click())
+ await mkdir('qa',{recursive:true})
+ await page.screenshot({path:'qa/release-desktop.png',fullPage:true})
+ await page.evaluate(async()=>{await navigator.serviceWorker.ready})
+ await page.reload({waitUntil:'networkidle0'})
+ await page.setOfflineMode(true)
+ await page.reload({waitUntil:'domcontentloaded'})
+ await page.waitForSelector('.verse.active')
+ assert.match(await page.$eval('.verse.active p',e=>e.textContent),/God so loved the world/)
+ await page.setOfflineMode(false)
+ await page.setViewport({width:390,height:844})
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'horizontal overflow')
+ assert.deepEqual(errors,[]);assert.deepEqual(failures,[])
+ console.log(JSON.stringify({url,result:'PASS',checks:['public render','Space navigation','resume after reload','bookmark','direct passage','offline reload','mobile overflow','no runtime/network errors']},null,2))
+} finally {await browser.close()}

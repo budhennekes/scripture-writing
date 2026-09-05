@@ -1,0 +1,18 @@
+{
+  "name": "Scripture Scribe",
+  "short_name": "Scribe",
+  "description": "A calm, focused reader for handwriting Scripture.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fcfdff",
+  "theme_color": "#172d2b",
+  "icons": [
+    {
+      "src": "scribe-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
