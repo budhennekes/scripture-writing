@@ -189,6 +189,11 @@ function App() {
   const [positionNotice, setPositionNotice] = useState('')
   const [saveError, setSaveError] = useState(false)
   const [focusWriting, setFocusWriting] = useState(false)
+  const previousButtonRef = useRef<HTMLButtonElement>(null)
+  const nextButtonRef = useRef<HTMLButtonElement>(null)
+  const bookmarkButtonRef = useRef<HTMLButtonElement>(null)
+  const bookmarkPending = useRef(false)
+  const [previousHeight, setPreviousHeight] = useState(0)
   const [lineGuide, setLineGuide] = useState(false)
   const [guideHeight, setGuideHeight] = useState(54)
   const [guideTop, setGuideTop] = useState<number | null>(null)
@@ -244,10 +249,16 @@ function App() {
         ...(translation === 'WEB' ? { position, savedPlaces } : {}),
       }))
       setSaveError(false)
+      if (bookmarkPending.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        bookmarkButtonRef.current?.querySelector('svg')?.animate([
+          { transform: 'translateY(-3px)' }, { transform: 'translateY(1px)', offset: 0.7 }, { transform: 'none' },
+        ], { duration: 200, easing: 'ease-out' })
+      }
     } catch { setSaveError(true) }
+    bookmarkPending.current = false
   }, [bible, translation, position, handedness, fontSize, theme, savedPlaces, saved])
 
-  useEffect(() => { setGuideTop(null) }, [position, fontSize, translation, focusWriting])
+  useEffect(() => { setGuideTop(null) }, [position, fontSize, translation])
   useEffect(() => {
     const clear = () => setGuideTop(null)
     window.addEventListener('resize', clear)
@@ -255,12 +266,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     activeVerseRef.current?.scrollIntoView({ behavior: 'instant', block: 'nearest' })
-    if (!reducedMotion) activeVerseRef.current?.animate([
-      { opacity: 0.45, transform: 'translateY(8px)' },
-      { opacity: 1, transform: 'translateY(0)' },
-    ], { duration: 230, easing: 'cubic-bezier(.2,.7,.2,1)' })
   }, [position])
 
   useEffect(() => {
@@ -319,15 +325,36 @@ function App() {
     setPanel('navigate')
   }, [position])
 
+  const toggleBookmark = useCallback(() => {
+    const existing = savedPlaces.find(place => samePosition(place.position, position))
+    bookmarkPending.current = !existing
+    setSavedPlaces(places => existing
+      ? places.filter(place => place.id !== existing.id)
+      : [{ id: crypto.randomUUID(), position: { ...position }, savedAt: Date.now() }, ...places])
+  }, [savedPlaces, position])
+
+  const keyboardMove = useCallback((direction: 1 | -1) => {
+    const button = direction === 1 ? nextButtonRef.current : previousButtonRef.current
+    if (button?.disabled) return
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      button?.getAnimations().forEach(animation => animation.cancel())
+      button?.animate([{ transform: 'translateY(2px) scale(.98)' }, { transform: 'none' }], { duration: 160, easing: 'ease-out' })
+    }
+    move(direction)
+  }, [move])
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey || event.metaKey || event.altKey || event.repeat) return
+      if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || event.repeat) return
       if (event.key === 'Escape') {
         setPanel(null)
+        if (!panel) setFocusWriting(false)
         return
       }
       const target = event.target as HTMLElement
-      if (['SELECT', 'INPUT', 'BUTTON'].includes(target.tagName) || panel) return
+      if (target.closest('select, input, textarea') || target.isContentEditable || panel) return
+      // Native keyboard activation stays intact; arrows work on toolbar buttons.
+      if (target.closest('button, a') && [' ', 'Enter'].includes(event.key)) return
       if (event.key.toLowerCase() === 'g') {
         event.preventDefault()
         openNavigator()
@@ -335,26 +362,21 @@ function App() {
       }
       if (event.key.toLowerCase() === 'b') {
         event.preventDefault()
-        setSavedPlaces((places) => {
-          const existing = places.find((place) => samePosition(place.position, position))
-          return existing
-            ? places.filter((place) => place.id !== existing.id)
-            : [{ id: crypto.randomUUID(), position: { ...position }, savedAt: Date.now() }, ...places]
-        })
+        toggleBookmark()
         return
       }
       if ([' ', 'ArrowRight', 'ArrowDown', 'PageDown', 'Enter'].includes(event.key)) {
         event.preventDefault()
-        move(1)
+        keyboardMove(1)
       }
       if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(event.key)) {
         event.preventDefault()
-        move(-1)
+        keyboardMove(-1)
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [move, openNavigator, panel, position])
+  }, [keyboardMove, openNavigator, panel, toggleBookmark])
 
   const toggleFullscreen = async () => {
     try {
@@ -410,24 +432,23 @@ function App() {
     setPanel(null)
   }
 
-  const toggleBookmark = () => {
-    setSavedPlaces((places) => currentBookmark
-      ? places.filter((place) => place.id !== currentBookmark.id)
-      : [{ id: crypto.randomUUID(), position: { ...position }, savedAt: Date.now() }, ...places])
-  }
-
   const removeSavedPlace = (id: string) => {
     setSavedPlaces((places) => places.filter((place) => place.id !== id))
   }
 
   return (
-    <main className={`app-shell ${controlsOnLeft ? 'controls-left' : 'controls-right'} ${focusWriting ? 'focus-writing' : ''}`}>
+    <main onClick={event => {
+      // Pointer toolbar actions hand Space back to reading; Tab/Space remain native.
+      if (event.detail > 0 && (event.target as HTMLElement).closest('.writing-tools button, .topbar button, .rail-button')) {
+        activeVerseRef.current?.focus({ preventScroll: true })
+      }
+    }} className={`app-shell ${controlsOnLeft ? 'controls-left' : 'controls-right'} ${focusWriting ? 'focus-writing' : ''}`}>
       <aside className="control-rail" aria-label="Writing controls">
-        <button type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label="Previous verse">
+        <button ref={previousButtonRef} type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label="Previous verse">
           <ArrowUpIcon />
           <span>Back</span>
         </button>
-        <button type="button" className="rail-button next-button" onClick={() => move(1)} disabled={atEnd} aria-label="Next verse">
+        <button ref={nextButtonRef} type="button" className="rail-button next-button" onClick={() => move(1)} disabled={atEnd} aria-label="Next verse">
           <span>Next</span>
           <ArrowDownIcon />
         </button>
@@ -438,7 +459,7 @@ function App() {
       </aside>
 
       <section className="reader-panel">
-        <header className="topbar">
+        <header className="topbar" inert={focusWriting}>
           <div className="reader-identity">
             <a className="scribe-wordmark" href={import.meta.env.BASE_URL} aria-label="Homepage">The writing room<span className="wordmark-period" aria-hidden="true">.</span></a>
             <span className="identity-rule" aria-hidden="true" />
@@ -449,7 +470,7 @@ function App() {
           </button>
           </div>
           <div className="topbar-actions">
-            <button type="button" className={`icon-button bookmark-button ${currentBookmark ? 'selected' : ''}`} onClick={toggleBookmark} aria-label={currentBookmark ? 'Remove bookmark' : 'Save this verse'}>
+            <button ref={bookmarkButtonRef} type="button" className={`icon-button bookmark-button ${currentBookmark ? 'selected' : ''}`} onClick={toggleBookmark} aria-label={currentBookmark ? 'Remove bookmark' : 'Save this verse'}>
               <BookmarkIcon filled={Boolean(currentBookmark)} />
             </button>
             <button type="button" className="icon-button theme-button" onClick={() => setTheme(theme === 'paper' ? 'night' : 'paper')} aria-label={theme === 'paper' ? 'Use night theme' : 'Use paper theme'}>
@@ -465,10 +486,14 @@ function App() {
         </header>
 
         <div className="writing-tools">
-          <select aria-label="Bible translation" value={translation} onChange={event => { setPanel(null); setTranslation(event.target.value) }}>
+          <select name="translation" inert={focusWriting} aria-label="Bible translation" value={translation} onChange={event => { setPanel(null); setTranslation(event.target.value) }}>
             <option value="WEB">WEB</option><option value="ASV1901">ASV 1901</option><option value="BSB">BSB</option>
           </select>
-          <button type="button" aria-pressed={focusWriting} onClick={() => setFocusWriting(!focusWriting)}>Focus</button>
+          <span className="writing-reference">{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation}</span>
+          <button type="button" className="writing-mode-button" aria-pressed={focusWriting} onClick={() => {
+            if (!focusWriting) setPreviousHeight(activeVerseRef.current?.previousElementSibling?.getBoundingClientRect().height ?? 0)
+            setFocusWriting(!focusWriting)
+          }}>{focusWriting ? 'Exit writing mode' : 'Enter writing mode'}</button>
           <button type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button>
           {positionNotice && <span role="status">{positionNotice}</span>}
           {lineGuide && <span>Click a line to mark your place.</span>}
@@ -479,11 +504,12 @@ function App() {
             <h1>{book.name}<span className="chapter-number">{String(chapter.number).padStart(2, '0')}</span></h1>
             <div className="chapter-caption"><span>Scripture, by hand.</span><span>Verse {currentVerse.number} of {chapter.verses.length}</span></div>
           </div>
-          <div className="scripture" style={{ '--scripture-size': `${fontSize}px` } as React.CSSProperties}>
+          <div className="scripture" style={{ '--scripture-size': `${fontSize}px`, '--previous-height': `${previousHeight}px` } as React.CSSProperties}>
+            {focusWriting && position.verse === 0 && <div className="previous-placeholder" aria-hidden="true" />}
             {visibleVerses.map((verse) => {
               const isActive = verse.number === currentVerse.number
               return (
-                <article className={isActive ? 'verse active' : 'verse'} key={verse.number} ref={isActive ? activeVerseRef : undefined} aria-current={isActive ? 'true' : undefined}>
+                <article tabIndex={isActive ? -1 : undefined} className={isActive ? 'verse active' : verse.number < currentVerse.number ? 'verse previous-context' : 'verse'} key={verse.number} ref={isActive ? activeVerseRef : undefined} aria-current={isActive ? 'true' : undefined}>
                   <sup>{verse.number}</sup>
                   <p className={isActive && lineGuide ? 'guided-text' : undefined}
                     tabIndex={isActive && lineGuide ? 0 : undefined}
@@ -495,14 +521,15 @@ function App() {
                       setGuideTop(Math.floor((event.clientY - event.currentTarget.getBoundingClientRect().top) / height) * height)
                     }}
                     onKeyDown={event => {
-                      if (!lineGuide || !isActive || !['ArrowUp', 'ArrowDown'].includes(event.key)) return
+                      if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || event.repeat || !lineGuide || !isActive || !['ArrowUp', 'ArrowDown'].includes(event.key)) return
                       event.preventDefault(); event.stopPropagation()
                       const height = parseFloat(getComputedStyle(event.currentTarget).lineHeight)
                       setGuideHeight(height)
                       const max = event.currentTarget.offsetHeight - height
                       setGuideTop(top => Math.max(0, Math.min(max, (top ?? 0) + (event.key === 'ArrowDown' ? height : -height))))
                     }}
-                    style={isActive && lineGuide && guideTop !== null ? { backgroundImage: `linear-gradient(to bottom, transparent ${guideTop}px, var(--accent-soft) ${guideTop}px, var(--accent-soft) ${guideTop + guideHeight}px, transparent ${guideTop + guideHeight}px)` } : undefined}
+                    data-line-marked={isActive && lineGuide && guideTop !== null ? true : undefined}
+                    style={isActive && lineGuide && guideTop !== null ? { '--guide-top': `${guideTop}px`, '--guide-height': `${guideHeight}px` } as React.CSSProperties : undefined}
                   >{verse.text}</p>
                 </article>
               )

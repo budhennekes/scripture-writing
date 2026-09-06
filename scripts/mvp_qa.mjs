@@ -20,10 +20,13 @@ try {
   if(id!=='WEB'){assert.equal(await page.$('.bookmark-button.selected'),null);await page.click('.bookmark-button')}
  }
  await page.click('.writing-tools button:nth-of-type(1)')
- assert.equal(await page.$eval('.chapter-label',e=>getComputedStyle(e).display),'none')
+ await page.waitForFunction(()=>getComputedStyle(document.querySelector('.chapter-label')).opacity==='0')
+ assert.equal(await page.$eval('.chapter-label',e=>getComputedStyle(e).display),'block')
  await page.click('.writing-tools button:nth-of-type(2)');await page.click('.verse.active p')
  assert.equal(await page.$eval('.verse.active p',e=>e.textContent),texts.BSB)
- assert.notEqual(await page.$eval('.verse.active p',e=>e.style.backgroundImage),'')
+ assert.equal(await page.$eval('.verse.active p',e=>getComputedStyle(e).backgroundImage),'none')
+ assert.equal(await page.$eval('.verse.active p',e=>e.dataset.lineMarked),'true')
+ assert.equal(await page.$eval('.verse.active p',e=>getComputedStyle(e,'::before').width),'2px')
  await page.focus('.verse.active p');await page.keyboard.press('ArrowDown')
  assert.match(await page.$eval('.passage-button',e=>e.textContent),/3:16/)
  await mkdir('qa',{recursive:true});await page.screenshot({path:'qa/mvp-focus-desktop.png'})

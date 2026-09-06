@@ -10,7 +10,8 @@ Public MVP: https://budhennekes.github.io/scripture-writing/
 - Enter a passage such as `John 3:16`, or browse by book, chapter, and verse.
 - Write on paper. Use Space, arrows, or the large Next control to advance.
 - Choose your writing hand in settings to position controls on the other side.
-- Turn on Focus to reduce distractions. Turn on Line guide and click a line to mark your place.
+- Choose **Enter writing mode** to fade secondary UI without moving Scripture; **Exit writing mode** stays visible. Arrow keys continue after toolbar actions. Pointer clicks return focus to the text so Space continues writing.
+- Turn on **Line guide**, then click a line or use up/down while the text is focused to move a fine margin marker. Navigation controls give brief keyboard feedback; Scripture stays still. Reduced-motion preferences are respected.
 - Adjust type size and light/dark appearance in settings.
 
 Your place and bookmarks are stored in this browser, separately for each translation. They do not sync between devices; clearing browser storage removes them. Moving from the local prototype to the public URL does not transfer local saves. Focus and line guide are session controls. Offline support is available after a successful online load and service-worker installation. Browser support for fullscreen and screen wake lock varies.
