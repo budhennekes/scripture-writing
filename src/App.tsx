@@ -12,7 +12,11 @@ type Bible = {
 type Position = { book: number; chapter: number; verse: number }
 type SavedPlace = { id: string; position: Position; savedAt: number }
 type Handedness = 'right' | 'left'
-type Theme = 'paper' | 'night'
+type Theme = 'paper' | 'gray' | 'sage' | 'night'
+const BACKGROUNDS: { value: Theme; label: string }[] = [
+  { value: 'paper', label: 'White' }, { value: 'gray', label: 'Soft gray' },
+  { value: 'sage', label: 'Pale sage' }, { value: 'night', label: 'Night' },
+]
 type Panel = 'navigate' | 'settings' | null
 
 type CanonicalPosition = { bookId: string; chapter: number; verse: number }
@@ -87,19 +91,6 @@ const SettingsIcon = () => (
 const ExpandIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" />
-  </svg>
-)
-
-const MoonIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z" />
-  </svg>
-)
-
-const SunIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <circle cx="12" cy="12" r="3.5" />
-    <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
   </svg>
 )
 
@@ -203,7 +194,7 @@ function App() {
   const [draftPosition, setDraftPosition] = useState<Position>(saved.position ?? DEFAULT_POSITION)
   const [handedness, setHandedness] = useState<Handedness>(saved.handedness ?? 'right')
   const [fontSize, setFontSize] = useState(saved.fontSize ?? 36)
-  const [theme, setTheme] = useState<Theme>(saved.theme ?? 'paper')
+  const [theme, setTheme] = useState<Theme>(BACKGROUNDS.some(option => option.value === saved.theme) ? saved.theme : 'paper')
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(saved.savedPlaces ?? [])
   const [panel, setPanel] = useState<Panel>(null)
   const [referenceQuery, setReferenceQuery] = useState('')
@@ -413,7 +404,8 @@ function App() {
   const visibleStart = Math.max(0, position.verse - 1)
   const visibleEnd = Math.min(chapter.verses.length, position.verse + 2)
   const visibleVerses = chapter.verses.slice(visibleStart, visibleEnd)
-  const chapterProgress = Math.round(((position.verse + 1) / chapter.verses.length) * 100)
+  const lastVerseNumber = chapter.verses[chapter.verses.length - 1].number
+  const chapterProgress = (currentVerse.number / lastVerseNumber) * 100
   const controlsOnLeft = handedness === 'right'
   const atStart = position.book === 0 && position.chapter === 0 && position.verse === 0
   const finalBook = bible.books.length - 1
@@ -452,10 +444,6 @@ function App() {
           <span>Next</span>
           <ArrowDownIcon />
         </button>
-        <div className="rail-progress" aria-label={`${chapterProgress}% through this chapter`}>
-          <span style={{ '--progress': `${chapterProgress}%` } as React.CSSProperties} />
-          <strong>{position.verse + 1}/{chapter.verses.length}</strong>
-        </div>
       </aside>
 
       <section className="reader-panel">
@@ -472,9 +460,6 @@ function App() {
           <div className="topbar-actions">
             <button ref={bookmarkButtonRef} type="button" className={`icon-button bookmark-button ${currentBookmark ? 'selected' : ''}`} onClick={toggleBookmark} aria-label={currentBookmark ? 'Remove bookmark' : 'Save this verse'}>
               <BookmarkIcon filled={Boolean(currentBookmark)} />
-            </button>
-            <button type="button" className="icon-button theme-button" onClick={() => setTheme(theme === 'paper' ? 'night' : 'paper')} aria-label={theme === 'paper' ? 'Use night theme' : 'Use paper theme'}>
-              {theme === 'paper' ? <MoonIcon /> : <SunIcon />}
             </button>
             <button type="button" className="icon-button fullscreen-button" onClick={toggleFullscreen} aria-label="Toggle fullscreen">
               <ExpandIcon />
@@ -502,7 +487,7 @@ function App() {
           <div className="chapter-label">
             <div className="chapter-kicker">{bible.translation.name} <span>Chapter {chapter.number}</span></div>
             <h1>{book.name}<span className="chapter-number">{String(chapter.number).padStart(2, '0')}</span></h1>
-            <div className="chapter-caption"><span>Scripture, by hand.</span><span>Verse {currentVerse.number} of {chapter.verses.length}</span></div>
+            <div className="chapter-caption"><span>Scripture, by hand.</span><span>Verse {currentVerse.number} of {lastVerseNumber}</span></div>
           </div>
           <div className="scripture" style={{ '--scripture-size': `${fontSize}px`, '--previous-height': `${previousHeight}px` } as React.CSSProperties}>
             {focusWriting && position.verse === 0 && <div className="previous-placeholder" aria-hidden="true" />}
@@ -538,7 +523,11 @@ function App() {
         </div>
 
         <footer className="reader-footer">
-          <p>Space or arrow key to continue</p>
+          <div className="chapter-position" role="progressbar" aria-label="Chapter position" aria-valuemin={1} aria-valuemax={lastVerseNumber} aria-valuenow={currentVerse.number} aria-valuetext={`${book.name} ${chapter.number} · Verse ${currentVerse.number} of ${lastVerseNumber}`}>
+            <div className="chapter-position-line" aria-hidden="true"><span style={{ '--progress': `${chapterProgress}%` } as React.CSSProperties} /></div>
+            <p>{book.name} {chapter.number} · Verse {currentVerse.number} of {lastVerseNumber}</p>
+          </div>
+          <p className="keyboard-hint">Space or arrow key to continue</p>
           <p className="saved-status"><span aria-hidden="true" />{saveError ? 'Not saved — device storage unavailable' : 'Place saved on this device'}</p>
         </footer>
       </section>
@@ -661,12 +650,11 @@ function App() {
 
               <div className="settings-group">
                 <div className="setting-copy">
-                  <h2>Appearance</h2>
-                  <p>Use a crisp light page or a deep-ink reading surface.</p>
+                  <h2>Background</h2>
+                  <p>A comfortable reading surface, saved on this device.</p>
                 </div>
-                <div className="segmented-control" role="group" aria-label="Appearance">
-                  <button type="button" className={theme === 'paper' ? 'selected' : ''} onClick={() => setTheme('paper')}>Paper</button>
-                  <button type="button" className={theme === 'night' ? 'selected' : ''} onClick={() => setTheme('night')}>Night</button>
+                <div className="segmented-control background-options" role="group" aria-label="Background">
+                  {BACKGROUNDS.map(option => <button key={option.value} type="button" aria-pressed={theme === option.value} className={theme === option.value ? 'selected' : ''} onClick={() => setTheme(option.value)}>{option.label}</button>)}
                 </div>
               </div>
 

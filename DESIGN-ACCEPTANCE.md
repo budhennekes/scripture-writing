@@ -13,6 +13,10 @@ A copying companion, not a study dashboard. Optimize for looking up from a physi
 
 Reduce oversized book/chapter typography. Retain comfortable readable serif Scripture, restrained controls, adjustable type, and light/dark support. Do not substitute a new loud palette for functional polish.
 
+## Continuous surface and position
+
+Use one continuous background for the reader and free-hand controls. Remove the dark sidebar, filled coral pill, and decorative sidebar copy. Preserve generous transparent up/down touch targets with faint hover/focus treatment. Put a thin chapter-position bar at the bottom, with a small book/chapter and “Verse N of total” label. Keep it visible in writing mode. It represents current position, never inferred completed handwriting. Offer White, Soft gray, Pale sage, and Night in settings, remember the choice locally, and keep text contrast safe.
+
 ## Interaction requirements
 
 - Keep the active text anchored when entering writing mode and advancing ordinary verses.

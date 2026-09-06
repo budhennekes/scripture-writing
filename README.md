@@ -12,7 +12,8 @@ Public MVP: https://budhennekes.github.io/scripture-writing/
 - Choose your writing hand in settings to position controls on the other side.
 - Choose **Enter writing mode** to fade secondary UI without moving Scripture; **Exit writing mode** stays visible. Arrow keys continue after toolbar actions. Pointer clicks return focus to the text so Space continues writing.
 - Turn on **Line guide**, then click a line or use up/down while the text is focused to move a fine margin marker. Navigation controls give brief keyboard feedback; Scripture stays still. Reduced-motion preferences are respected.
-- Adjust type size and light/dark appearance in settings.
+- Adjust type size and choose **White**, **Soft gray**, **Pale sage**, or **Night** in settings. Background choices are saved locally; existing Paper settings become White.
+- Subtle, transparent Back/Next controls stay on your free-hand side. The thin bottom line shows chapter position, not completion; its reference stays visible in writing mode.
 
 Your place and bookmarks are stored in this browser, separately for each translation. They do not sync between devices; clearing browser storage removes them. Moving from the local prototype to the public URL does not transfer local saves. Focus and line guide are session controls. Offline support is available after a successful online load and service-worker installation. Browser support for fullscreen and screen wake lock varies.
 
@@ -35,6 +36,7 @@ npm run lint
 npm run qa
 node scripts/mvp_qa.mjs
 node scripts/readability_qa.mjs
+node scripts/minimal_ui_qa.mjs
 node scripts/design_matrix.mjs
 node scripts/persistence_qa.mjs
 node scripts/release_qa.mjs
