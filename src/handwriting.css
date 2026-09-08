@@ -1,0 +1,36 @@
+/* One verse. One control row. A resting place for the free hand. */
+.app-shell .reader-panel {grid-template-rows:128px minmax(0,1fr) 52px;}
+.landscape-scene {height:160px;}
+.landscape-scene img {object-position:50% 45%;}
+.control-rail,.controls-right .control-rail {background:linear-gradient(180deg,transparent 128px,var(--page) 128px);justify-content:center;gap:30px;}
+.next-button {height:min(48dvh,420px);width:100%;gap:18px;}
+.previous-button {height:60px;}
+.writing-tools {padding:0 80px 0 40px;gap:16px;flex-wrap:nowrap;}
+.writing-tools .writing-reference,.focus-writing .writing-tools .writing-reference {display:block;position:static;width:auto;max-width:none;min-width:0;margin-right:auto;font-size:21px;}
+.writing-tools .reference-picker {color:white;}
+.writing-tools .reference-picker:hover {color:#fff;text-decoration:underline;text-underline-offset:5px;}
+.writing-tools .writing-mode-button {margin-left:0;flex-shrink:0;}
+.writing-tools .setup-button {color:white;flex-shrink:0;min-width:44px;}
+.focus-writing .writing-tools .reference-picker,.focus-writing .writing-tools .setup-button {color:var(--muted);}
+.scripture-wrap {padding-top:56px;}
+.verse.active {padding-top:24px;}
+.reader-footer {padding:0 40px;}
+.keyboard-hint {display:none;}
+.saved-status {display:none;}
+.saved-status[role='alert'] {display:block;visibility:visible!important;position:fixed;bottom:10px;left:20px;color:var(--ink);background:var(--page);padding:6px;}
+.line-guide-button {min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--ink);cursor:pointer;}
+.line-guide-button[aria-pressed='true'] {background:var(--accent-soft);}
+@media(max-width:1050px) {.writing-tools {padding-left:24px;padding-right:60px;gap:10px;}.writing-tools .writing-reference {font-size:19px;}.scripture-wrap {padding-top:48px;}}
+@media(max-width:720px) {
+ .app-shell .reader-panel {grid-template-rows:112px minmax(0,1fr) 52px;}
+ .landscape-scene {height:138px;}
+ .control-rail,.controls-right .control-rail {background:linear-gradient(180deg,transparent 112px,var(--page) 112px);gap:24px;}
+ .writing-tools {padding:10px 16px;gap:4px 8px;flex-wrap:wrap;align-content:center;}
+ .writing-tools .writing-reference,.focus-writing .writing-tools .writing-reference {font-size:18px;flex-basis:100%;padding-right:22px;}
+ .writing-tools .writing-mode-button {font-size:12px;min-height:36px;padding:8px 10px;}
+ .writing-tools .setup-button {height:36px;min-height:36px;padding:6px;}
+ .scripture-wrap {padding:32px 20px;}
+ .next-button {height:min(42dvh,360px);}
+ .chapter-position {font-size:10px;}
+}
+@media(max-height:540px) {.app-shell .reader-panel {grid-template-rows:80px minmax(0,1fr) 44px;}.scripture-wrap {padding-top:12px;}.landscape-scene {height:100px;}.control-rail,.controls-right .control-rail {background:var(--page);gap:12px;}.next-button {height:40dvh;}}

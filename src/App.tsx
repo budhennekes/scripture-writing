@@ -3,6 +3,7 @@ import './App.css'
 import './redesign.css'
 import './writing-page.css'
 import './landscape.css'
+import './handwriting.css'
 
 type Verse = { number: number; text: string }
 type Chapter = { number: number; verses: Verse[] }
@@ -87,12 +88,6 @@ const SearchIcon = () => (
 const SettingsIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 5v4M6 15v4" />
-  </svg>
-)
-
-const ExpandIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" />
   </svg>
 )
 
@@ -404,15 +399,6 @@ function App() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [keyboardMove, openNavigator, panel, toggleBookmark, exitWriting])
 
-  const toggleFullscreen = async () => {
-    try {
-      if (!document.fullscreenElement) await document.documentElement.requestFullscreen()
-      else await document.exitFullscreen()
-    } catch {
-      // Fullscreen is optional and unsupported in some mobile browsers.
-    }
-  }
-
   if (loadError) {
     return (
       <main className="status-screen">
@@ -436,9 +422,7 @@ function App() {
   const book = bible.books[position.book]
   const chapter = book.chapters[position.chapter]
   const currentVerse = chapter.verses[position.verse]
-  const visibleStart = Math.max(0, position.verse - 1)
-  const visibleEnd = Math.min(chapter.verses.length, position.verse + 2)
-  const visibleVerses = chapter.verses.slice(visibleStart, visibleEnd)
+  const visibleVerses = [currentVerse]
   const lastVerseNumber = chapter.verses[chapter.verses.length - 1].number
   const chapterProgress = (currentVerse.number / lastVerseNumber) * 100
   const controlsOnLeft = handedness === 'right'
@@ -470,7 +454,7 @@ function App() {
         activeVerseRef.current?.focus({ preventScroll: true })
       }
     }} className={`app-shell ${controlsOnLeft ? 'controls-left' : 'controls-right'} ${focusWriting ? 'focus-writing' : ''}`}>
-      <div className="landscape-scene" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}images/still-coast.webp`} alt="" width="1672" height="941" /></div>
+      <div className="landscape-scene" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}images/olive-light.webp`} alt="" width="1672" height="941" /></div>
       <aside className="control-rail" aria-label="Writing controls">
         <button ref={previousButtonRef} type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label="Previous verse">
           <ArrowUpIcon />
@@ -486,35 +470,12 @@ function App() {
         <button ref={bookmarkButtonRef} type="button" className={`icon-button bookmark-button page-ribbon ${currentBookmark && !saveError ? 'selected' : ''}`} onClick={toggleBookmark} aria-label={currentBookmark ? 'Remove bookmark' : 'Save this verse'}>
           <BookmarkIcon filled={Boolean(currentBookmark && !saveError)} />
         </button>
-        <header className="topbar" inert={focusWriting}>
-          <div className="reader-identity">
-            <a className="scribe-wordmark" href={import.meta.env.BASE_URL} aria-label="Homepage">The writing room<span className="wordmark-period" aria-hidden="true">.</span></a>
-            <span className="identity-rule" aria-hidden="true" />
-          <button type="button" className="passage-button" onClick={openNavigator} aria-label={`Go to a passage. Current passage ${getReference(bible, position)}`}>
-            <span>{book.name}</span>
-            <strong>{chapter.number}:{currentVerse.number}</strong>
-            <ChevronDownIcon />
-          </button>
-          </div>
-          <div className="topbar-actions">
-            <button type="button" className="icon-button fullscreen-button" onClick={toggleFullscreen} aria-label="Toggle fullscreen">
-              <ExpandIcon />
-            </button>
-            <button type="button" className="icon-button" onClick={() => setPanel('settings')} aria-label="Open settings">
-              <SettingsIcon />
-            </button>
-          </div>
-        </header>
-
         <div className="writing-tools">
-          <select name="translation" inert={focusWriting} aria-label="Bible translation" value={translation} onChange={event => { setPanel(null); setTranslation(event.target.value) }}>
-            <option value="WEB">WEB</option><option value="ASV1901">ASV 1901</option><option value="BSB">BSB</option>
-          </select>
           <span className="writing-reference"><button className="reference-picker" type="button" onClick={openNavigator} aria-haspopup="dialog" aria-label="Choose passage or translation">{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation}<ChevronDownIcon /></button></span>
           <button type="button" className="writing-mode-button" aria-pressed={focusWriting} onClick={focusWriting ? exitWriting : enterWriting}>{focusWriting ? 'Exit writing mode' : 'Enter writing mode'}</button>
-          <button className="line-guide-button" type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button>
+          <button type="button" className="icon-button setup-button" onClick={() => setPanel('settings')} aria-label="Open settings"><SettingsIcon /></button>
           {positionNotice && <span role="status">{positionNotice}</span>}
-          {lineGuide && <span>Click a line to mark your place.</span>}
+
         </div>
         <div className="scripture-wrap">
           <div className="chapter-label">
@@ -523,7 +484,7 @@ function App() {
             <div className="chapter-caption"><span>Scripture, by hand.</span><span>Verse {currentVerse.number} of {lastVerseNumber}</span></div>
           </div>
           <div className="scripture" style={{ '--scripture-size': `${fontSize}px`, '--previous-height': `${previousHeight}px` } as React.CSSProperties}>
-            {position.verse === 0 && <div className="previous-placeholder" aria-hidden="true" />}
+
             {visibleVerses.map((verse) => {
               const isActive = verse.number === currentVerse.number
               return (
@@ -561,7 +522,7 @@ function App() {
             <p>{book.name} {chapter.number} · Verse {currentVerse.number} of {lastVerseNumber}</p>
           </div>
           <p className="keyboard-hint">Space or arrow key to continue</p>
-          <p className="saved-status"><span aria-hidden="true" />{saveError ? 'Not saved — device storage unavailable' : 'Place saved on this device'}</p>
+          <p className="saved-status" role={saveError ? 'alert' : undefined}><span aria-hidden="true" />{saveError ? 'Not saved — device storage unavailable' : 'Place saved on this device'}</p>
         </footer>
       </section>
 
@@ -698,6 +659,7 @@ function App() {
                 </div>
               </div>
 
+              <div className="settings-group"><div className="setting-copy"><h2>Line guide</h2><p>Mark the line you are copying.</p></div><button className="line-guide-button" type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button></div>
               <div className="dialog-note">
                 <p><strong>Keyboard controls</strong></p>
                 <p>Space or arrows move through verses. Press G to go to a passage. Press B to bookmark.</p>

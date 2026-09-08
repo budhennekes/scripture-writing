@@ -21,7 +21,11 @@ All bundled editions contain the 66-book Protestant canon. They do not include D
 
 ## Visual setting
 
-The normal reader uses an original coastal landscape above an opaque Scripture surface. Focus fades out the landscape without moving the text. Background choices use cool mineral tones; Night uses midnight blue. All motion respects reduced-motion settings. The image is bundled locally and cached for offline use.
+The reader shows one verse and one compact row: passage/translation chooser, writing mode, and settings. Duplicate selectors and surrounding verses are removed. Next has a large free-hand target with Back separated above it; writing-hand preference mirrors the controls. Line guide is in settings. The normal reader uses original olive-branch imagery above an opaque Scripture surface. Focus fades out the landscape without moving the text. Background choices use cool mineral tones; Night uses midnight blue. All motion respects reduced-motion settings. The image is bundled locally and cached for offline use.
+
+## Current acceptance gate
+
+Run `npm run qa` (handwriting flow), `node scripts/readability_qa.mjs`, and `node scripts/reference_picker_qa.mjs`. Older browser/release/writing-layout tests retain selectors from the superseded multi-toolbar interface and are historical, not release gates.
 
 ## Development
 
