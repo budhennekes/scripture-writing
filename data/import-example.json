@@ -1,0 +1,22 @@
+{
+  "translation": {
+    "name": "Example \u2014 World English Bible excerpt"
+  },
+  "books": [
+    {
+      "id": "JHN",
+      "name": "John",
+      "chapters": [
+        {
+          "number": 3,
+          "verses": [
+            {
+              "number": 16,
+              "text": "For God so loved the world, that he gave his one and only Son, that whoever believes in him should not perish, but have eternal life."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
