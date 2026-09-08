@@ -1,4 +1,4 @@
-# The writing room
+# Scripture, by hand
 
 A simple web companion for handwriting Scripture. No account, backend profile, analytics, or subscription.
 
@@ -19,9 +19,13 @@ Your place and bookmarks are stored in this browser, separately for each transla
 
 All bundled editions contain the 66-book Protestant canon. They do not include Deuterocanonical books. Verse numbering can differ between translations; the app uses reference-based positions rather than assuming matching array offsets.
 
+## Random verse
+
+Open the passage chooser and select **Write a random verse**. This draws from the current translation, excluding the currently displayed starting verse. The one/two-verse preference still applies. Random exploration and its Next/Back navigation do not overwrite your saved sequential place. Use **Return to saved place** in the chooser, or reload to resume it. Bookmarks made while exploring are retained. Choosing a specific passage ends exploration and saves that new position.
+
 ## Visual setting
 
-The reader shows one verse and one compact row: passage/translation chooser, writing mode, and settings. Duplicate selectors and surrounding verses are removed. Next has a large free-hand target with Back separated above it; writing-hand preference mirrors the controls. Line guide is in settings. The reader is a bounded writing sheet within original Christian chapel imagery. A cross belongs to the architecture rather than UI decoration. The passage picker and settings share the same visual system; dialogs trap keyboard focus and return it to Scripture on dismissal. Focus fades out the landscape without moving the text. Background choices use cool mineral tones; Night uses midnight blue. All motion respects reduced-motion settings. The image is bundled locally and cached for offline use.
+The reader defaults to one verse, with an optional two-verse view in Settings. A or Left Arrow goes back; D, Space, or Right Arrow advances past the displayed verses. A dismissible keyboard hint and verse-count preference save locally. The reader uses one compact row: passage/translation chooser, writing mode, and settings. Duplicate selectors and surrounding verses are removed. Next has a large free-hand target with Back separated above it; writing-hand preference mirrors the controls. Line guide is in settings. The reader is a bounded writing sheet within original Christian chapel imagery. A cross belongs to the architecture rather than UI decoration. The passage picker and settings share the same visual system; dialogs trap keyboard focus and return it to Scripture on dismissal. Focus fades out the landscape without moving the text. Background choices use cool mineral tones; Night uses midnight blue. All motion respects reduced-motion settings. The image is bundled locally and cached for offline use.
 
 ## Current acceptance gate
 

@@ -127,6 +127,8 @@ function loadSavedState() {
         handedness?: Handedness
         fontSize?: number
         theme?: Theme
+        versesPerView?: number
+        shortcutHintDismissed?: boolean
         savedPlaces?: SavedPlace[]
       }
     }
@@ -190,8 +192,11 @@ function App() {
   const [bible, setBible] = useState<Bible | null>(null)
   const [loadError, setLoadError] = useState(false)
   const [position, setPosition] = useState<Position>(saved.position ?? DEFAULT_POSITION)
+  const [randomReturn, setRandomReturn] = useState<Position | null>(null)
   const [draftPosition, setDraftPosition] = useState<Position>(saved.position ?? DEFAULT_POSITION)
   const [handedness, setHandedness] = useState<Handedness>(saved.handedness ?? 'right')
+  const [versesPerView, setVersesPerView] = useState<1 | 2>(saved.versesPerView === 2 ? 2 : 1)
+  const [shortcutHintDismissed, setShortcutHintDismissed] = useState(Boolean(saved.shortcutHintDismissed))
   const [fontSize, setFontSize] = useState(saved.fontSize ?? 36)
   const [theme, setTheme] = useState<Theme>(BACKGROUNDS.some(option => option.value === saved.theme) ? saved.theme : 'paper')
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(saved.savedPlaces ?? [])
@@ -216,6 +221,7 @@ function App() {
         const next = stored ? locate(data, stored.position) : translation === 'WEB' && validPosition(data, saved.position) ? saved.position : locate(data, carryPosition.current)
         const requested = stored?.position ?? carryPosition.current
         setPositionNotice(requested && JSON.stringify(canonical(data, next)) !== JSON.stringify(requested) ? 'That reference is unavailable in this translation. Showing Genesis 1:1.' : '')
+        setRandomReturn(null)
         setPosition(next)
         setDraftPosition(next)
         setSavedPlaces(stored ? stored.savedPlaces.map(place => ({ ...place, position: locate(data, place.position) })) : translation === 'WEB' ? (saved.savedPlaces ?? []).filter((place: SavedPlace) => validPosition(data, place.position)) : [])
@@ -228,15 +234,16 @@ function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme
     if (!bible || bible.translation.id !== translation) return
-    carryPosition.current = canonical(bible, position)
+    const savedPosition = randomReturn ?? position
+    carryPosition.current = canonical(bible, savedPosition)
     library.current = { translation, translations: { ...library.current.translations, [translation]: {
-      position: canonical(bible, position), savedPlaces: savedPlaces.map(place => ({ ...place, position: canonical(bible, place.position) })),
+      position: canonical(bible, savedPosition), savedPlaces: savedPlaces.map(place => ({ ...place, position: canonical(bible, place.position) })),
     } } }
     try {
       localStorage.setItem(LIBRARY_KEY, JSON.stringify(library.current))
       // Keep old WEB data intact and old global settings compatible.
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...loadSavedState(), handedness, fontSize, theme,
-        ...(translation === 'WEB' ? { position, savedPlaces } : {}),
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...loadSavedState(), handedness, fontSize, theme, versesPerView, shortcutHintDismissed,
+        ...(translation === 'WEB' ? { position: savedPosition, savedPlaces } : {}),
       }))
       setSaveError(false)
       if (bookmarkPending.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -246,7 +253,7 @@ function App() {
       }
     } catch { setSaveError(true) }
     bookmarkPending.current = false
-  }, [bible, translation, position, handedness, fontSize, theme, savedPlaces, saved])
+  }, [bible, translation, position, handedness, fontSize, theme, savedPlaces, saved, versesPerView, shortcutHintDismissed, randomReturn])
 
   useEffect(() => { setGuideTop(null) }, [position, fontSize, translation])
   useEffect(() => {
@@ -290,8 +297,11 @@ function App() {
       ensureWakeLock()
       setPosition((current) => {
         const next = { ...current }
+        const currentChapter = bible.books[current.book].chapters[current.chapter]
+        const previousChapter = current.chapter > 0 ? bible.books[current.book].chapters[current.chapter - 1] : current.book > 0 ? bible.books[current.book - 1].chapters.at(-1) : undefined
+        const steps = direction === 1 ? Math.min(versesPerView, currentChapter.verses.length - current.verse) : current.verse > 0 ? Math.min(versesPerView, current.verse) : previousChapter ? (previousChapter.verses.length % versesPerView || versesPerView) : 1
+        for (let step = 0; step < steps; step++) {
         const chapter = bible.books[next.book].chapters[next.chapter]
-
         if (direction === 1) {
           if (next.verse < chapter.verses.length - 1) next.verse += 1
           else if (next.chapter < bible.books[next.book].chapters.length - 1) {
@@ -311,10 +321,11 @@ function App() {
           next.chapter = bible.books[next.book].chapters.length - 1
           next.verse = bible.books[next.book].chapters[next.chapter].verses.length - 1
         }
+        }
         return next
       })
     },
-    [bible, ensureWakeLock],
+    [bible, ensureWakeLock, versesPerView],
   )
 
   const openNavigator = useCallback(() => {
@@ -375,7 +386,7 @@ function App() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey || event.metaKey || event.altKey || (event.shiftKey && event.key !== 'Tab') || event.repeat) return
+      if (event.isComposing || event.ctrlKey || event.metaKey || event.altKey || (event.shiftKey && event.key !== 'Tab') || event.repeat) return
       if (event.key === 'Escape') {
         setPanel(null)
         if (!panel) exitWriting()
@@ -402,11 +413,11 @@ function App() {
         toggleBookmark()
         return
       }
-      if ([' ', 'ArrowRight', 'ArrowDown', 'PageDown', 'Enter'].includes(event.key)) {
+      if (event.key.toLowerCase() === 'd' || [' ', 'ArrowRight', 'ArrowDown', 'PageDown', 'Enter'].includes(event.key)) {
         event.preventDefault()
         keyboardMove(1)
       }
-      if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(event.key)) {
+      if (event.key.toLowerCase() === 'a' || ['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(event.key)) {
         event.preventDefault()
         keyboardMove(-1)
       }
@@ -418,7 +429,7 @@ function App() {
   if (loadError) {
     return (
       <main className="status-screen">
-        <p className="wordmark">The writing room</p>
+        <p className="wordmark">Scripture, by hand</p>
         <h1>The Bible text could not load.</h1>
         <p>Refresh the page to try again, or return to WEB.</p><button onClick={() => setTranslation('WEB')}>Use WEB</button>
       </main>
@@ -428,7 +439,7 @@ function App() {
   if (!bible) {
     return (
       <main className="status-screen" aria-live="polite">
-        <p className="wordmark">The writing room</p>
+        <p className="wordmark">Scripture, by hand</p>
         <div className="loading-mark" aria-hidden="true">S</div>
         <p>Preparing your place.</p>
       </main>
@@ -438,7 +449,7 @@ function App() {
   const book = bible.books[position.book]
   const chapter = book.chapters[position.chapter]
   const currentVerse = chapter.verses[position.verse]
-  const visibleVerses = [currentVerse]
+  const visibleVerses = chapter.verses.slice(position.verse, position.verse + versesPerView)
   const lastVerseNumber = chapter.verses[chapter.verses.length - 1].number
   const chapterProgress = (currentVerse.number / lastVerseNumber) * 100
   const controlsOnLeft = handedness === 'right'
@@ -446,16 +457,31 @@ function App() {
   const finalBook = bible.books.length - 1
   const finalChapter = bible.books[finalBook].chapters.length - 1
   const finalVerse = bible.books[finalBook].chapters[finalChapter].verses.length - 1
-  const atEnd = position.book === finalBook && position.chapter === finalChapter && position.verse === finalVerse
+  const atEnd = position.book === finalBook && position.chapter === finalChapter && position.verse + visibleVerses.length - 1 === finalVerse
   const currentBookmark = savedPlaces.find((place) => samePosition(place.position, position))
   const parsedReference = referenceQuery ? resolveReference(referenceQuery, bible) : null
   const draftBook = bible.books[draftPosition.book]
   const draftChapter = draftBook.chapters[draftPosition.chapter]
 
   const goTo = (nextPosition: Position) => {
+    setRandomReturn(null)
     setPosition(nextPosition)
     setDraftPosition(nextPosition)
     setReferenceQuery('')
+    setPanel(null)
+  }
+
+  const randomVerse = () => {
+    const choices: Position[] = []
+    bible.books.forEach((book, bi) => book.chapters.forEach((chapter, ci) => chapter.verses.forEach((_, vi) => {
+      const candidate = { book: bi, chapter: ci, verse: vi }
+      if (!samePosition(candidate, position)) choices.push(candidate)
+    })))
+    const next = choices[Math.floor(Math.random() * choices.length)]
+    if (!next) return
+    setRandomReturn(randomReturn ?? position)
+    setPosition(next)
+    setDraftPosition(next)
     setPanel(null)
   }
 
@@ -471,13 +497,13 @@ function App() {
       }
     }} className={`app-shell ${controlsOnLeft ? 'controls-left' : 'controls-right'} ${focusWriting ? 'focus-writing' : ''}`}>
       <div className="landscape-scene" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}images/chapel-light.webp`} alt="" width="1672" height="941" /></div>
-      <div className="room-identity" aria-hidden={focusWriting}><p>The writing room<span>.</span></p><span>Scripture, by hand.</span></div>
+      <div className="room-identity" aria-hidden={focusWriting}><p>Scripture, by hand.</p></div>
       <aside className="control-rail" inert={Boolean(panel)} aria-label="Writing controls">
-        <button ref={previousButtonRef} type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label="Previous verse">
+        <button ref={previousButtonRef} type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label={versesPerView === 2 ? 'Previous verses' : 'Previous verse'}>
           <ArrowUpIcon />
           <span>Back</span>
         </button>
-        <button ref={nextButtonRef} type="button" className="rail-button next-button" onClick={() => move(1)} disabled={atEnd} aria-label="Next verse">
+        <button ref={nextButtonRef} type="button" className="rail-button next-button" onClick={() => move(1)} disabled={atEnd} aria-label={versesPerView === 2 ? 'Next verses' : 'Next verse'}>
           <span>Next</span>
           <ArrowDownIcon />
         </button>
@@ -488,7 +514,7 @@ function App() {
           <BookmarkIcon filled={Boolean(currentBookmark && !saveError)} />
         </button>
         <div className="writing-tools">
-          <span className="writing-reference"><button className="reference-picker" type="button" onClick={openNavigator} aria-haspopup="dialog" aria-label="Choose passage or translation">{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation}<ChevronDownIcon /></button></span>
+          <span className="writing-reference"><button className="reference-picker" type="button" onClick={openNavigator} aria-haspopup="dialog" aria-label="Choose passage or translation">{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation}{randomReturn ? ' · Random' : ''}<ChevronDownIcon /></button></span>
           <button type="button" className="writing-mode-button" aria-pressed={focusWriting} onClick={focusWriting ? exitWriting : enterWriting}>{focusWriting ? 'Exit writing mode' : 'Enter writing mode'}</button>
           <button type="button" className="icon-button setup-button" onClick={() => setPanel('settings')} aria-label="Open settings"><SettingsIcon /></button>
           {positionNotice && <span role="status">{positionNotice}</span>}
@@ -505,7 +531,7 @@ function App() {
             {visibleVerses.map((verse) => {
               const isActive = verse.number === currentVerse.number
               return (
-                <article tabIndex={isActive ? -1 : undefined} className={isActive ? 'verse active' : verse.number < currentVerse.number ? 'verse previous-context' : 'verse'} key={verse.number} ref={isActive ? activeVerseRef : undefined} aria-current={isActive ? 'true' : undefined}>
+                <article tabIndex={isActive ? -1 : undefined} className={isActive ? 'verse active' : verse.number < currentVerse.number ? 'verse previous-context' : 'verse companion'} key={verse.number} ref={isActive ? activeVerseRef : undefined} aria-current={isActive ? 'true' : undefined}>
                   <sup>{verse.number}</sup>
                   <p className={isActive && lineGuide ? 'guided-text' : undefined}
                     tabIndex={isActive && lineGuide ? 0 : undefined}
@@ -543,6 +569,11 @@ function App() {
         </footer>
       </section>
 
+      {!shortcutHintDismissed && !panel && <aside className="shortcut-coach" aria-label="Keyboard tip">
+        <button type="button" aria-label="Dismiss keyboard tip" onClick={() => { setShortcutHintDismissed(true); requestAnimationFrame(restoreReaderFocus) }}>×</button>
+        <p>Keep your writing hand on the page.</p>
+        <div><kbd>{handedness === 'right' ? 'A' : '←'}</kbd> Back <kbd>{handedness === 'right' ? 'D' : '→'}</kbd> Next <span>Space works too.</span></div>
+      </aside>}
       {panel && (
         <div className="dialog-backdrop" onMouseDown={() => setPanel(null)}>
           {panel === 'navigate' ? (
@@ -562,6 +593,9 @@ function App() {
                   <option value="ASV1901">American Standard Version (1901)</option>
                 </select>
               </label>
+              <button type="button" className="restore-hint random-verse" onClick={randomVerse}>Write a random verse</button>
+              {randomReturn ? <button type="button" className="restore-hint return-place" onClick={() => goTo(randomReturn)}>Return to saved place · {getReference(bible, randomReturn)}</button> : null}
+              <p className="random-note">Random verses won’t replace your saved place. Reloading returns you to it.</p>
               <div className="reference-search">
                 <SearchIcon />
                 <input ref={searchInputRef} name="reference" value={referenceQuery} onChange={(event) => setReferenceQuery(event.target.value)} onKeyDown={(event) => {
@@ -609,7 +643,7 @@ function App() {
                 <div className="saved-places-heading">
                   <div>
                     <h2 id="saved-places-title">Saved places</h2>
-                    <p>Your current place is always saved automatically.</p>
+                    <p>Your place is saved automatically, except during random exploration.</p>
                   </div>
                   <span>{savedPlaces.length}</span>
                 </div>
@@ -677,10 +711,12 @@ function App() {
               </div>
 
               <div className="settings-group"><div className="setting-copy"><h2>Line guide</h2><p>Mark the line you are copying.</p></div><button className="line-guide-button" type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button></div>
+              <div className="settings-group"><div className="setting-copy"><h2>Verses in view</h2><p>Next advances past the displayed verses.</p></div><div className="segmented-control" role="group" aria-label="Verses in view"><button type="button" className={versesPerView === 1 ? 'selected' : ''} aria-pressed={versesPerView === 1} onClick={() => setVersesPerView(1)}>One</button><button type="button" className={versesPerView === 2 ? 'selected' : ''} aria-pressed={versesPerView === 2} onClick={() => setVersesPerView(2)}>Two</button></div></div>
               <div className="dialog-note">
                 <p><strong>Keyboard controls</strong></p>
-                <p>Space or arrows move through verses. Press G to go to a passage. Press B to bookmark.</p>
+                <p>A / D, Space, or arrows move through verses. Press G to go to a passage. Press B to bookmark.</p>
               </div>
+              {shortcutHintDismissed && <button type="button" className="restore-hint" onClick={() => setShortcutHintDismissed(false)}>Show keyboard tip again</button>}
               <button type="button" className="primary-button" onClick={() => setPanel(null)}>Return to writing</button>
               <p className="copyright-note">{bible.translation.notice} <a href={bible.translation.source} target="_blank" rel="noreferrer">Translation source</a></p>
             </section>

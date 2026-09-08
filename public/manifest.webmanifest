@@ -1,6 +1,6 @@
 {
-  "name": "Scripture Scribe",
-  "short_name": "Scribe",
+  "name": "Scripture, by hand",
+  "short_name": "Scripture",
   "description": "A calm, focused reader for handwriting Scripture.",
   "start_url": "./",
   "scope": "./",
