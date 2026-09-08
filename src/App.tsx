@@ -454,7 +454,7 @@ function App() {
         activeVerseRef.current?.focus({ preventScroll: true })
       }
     }} className={`app-shell ${controlsOnLeft ? 'controls-left' : 'controls-right'} ${focusWriting ? 'focus-writing' : ''}`}>
-      <div className="landscape-scene" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}images/olive-light.webp`} alt="" width="1672" height="941" /></div>
+      <div className="landscape-scene" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}images/painted-cove.webp`} alt="" width="1915" height="821" /></div>
       <aside className="control-rail" aria-label="Writing controls">
         <button ref={previousButtonRef} type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label="Previous verse">
           <ArrowUpIcon />

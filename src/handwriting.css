@@ -1,7 +1,12 @@
 /* One verse. One control row. A resting place for the free hand. */
 .app-shell .reader-panel {grid-template-rows:128px minmax(0,1fr) 52px;}
 .landscape-scene {height:160px;}
-.landscape-scene img {object-position:50% 45%;}
+.landscape-scene img {object-position:50% 53%;}
+.landscape-scene::after {background:linear-gradient(90deg,rgb(17 32 56 / 42%),rgb(17 32 56 / 8%) 65%,rgb(17 32 56 / 15%));}
+.page-ribbon.selected::before {background:#bd9d91;}
+.scripture-wrap,.controls-right .scripture-wrap {border-radius:0;}
+.writing-tools .writing-mode-button {background:#f0f3f8;box-shadow:none;}
+@media(max-width:720px) {.landscape-scene img {object-position:65% 53%;}.landscape-scene::after {background:rgb(17 32 56 / 48%);}}
 .control-rail,.controls-right .control-rail {background:linear-gradient(180deg,transparent 128px,var(--page) 128px);justify-content:center;gap:30px;}
 .next-button {height:min(48dvh,420px);width:100%;gap:18px;}
 .previous-button {height:60px;}
