@@ -1,7 +1,7 @@
 const PREFIX = 'scripture-scribe-'
-const CACHE_NAME = PREFIX + 'v7-painted-cove'
+const CACHE_NAME = PREFIX + 'v8-chapel'
 const root = self.registration.scope
-const APP_SHELL = ['./', 'manifest.webmanifest', 'scribe-mark.svg', 'images/painted-cove.webp', 'data/bible.json', 'data/asv1901.json', 'data/bsb.json'].map(path => new URL(path, root).href)
+const APP_SHELL = ['./', 'manifest.webmanifest', 'scribe-mark.svg', 'images/chapel-light.webp', 'data/bible.json', 'data/asv1901.json', 'data/bsb.json'].map(path => new URL(path, root).href)
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)))
   self.skipWaiting()
