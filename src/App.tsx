@@ -6,6 +6,7 @@ import './landscape.css'
 import './handwriting.css'
 import './chapel.css'
 import './book-browser.css'
+import './phone.css'
 import { importInfo, readImport, storeImport } from './local-bible'
 
 type Verse = { number: number; text: string }
@@ -288,7 +289,10 @@ function App() {
   useEffect(() => {
     if (panel) {
       const timer = window.setTimeout(() => {
-        if (panel === 'navigate') searchInputRef.current?.focus()
+        if (panel === 'navigate') {
+          if (window.matchMedia('(pointer: coarse) and (max-width: 1000px)').matches) document.querySelector<HTMLButtonElement>('[aria-label="Close passage navigator"]')?.focus()
+          else searchInputRef.current?.focus()
+        }
         else document.querySelector<HTMLButtonElement>('[aria-label="Close settings"]')?.focus()
       }, 80)
       return () => { window.clearTimeout(timer); requestAnimationFrame(restoreReaderFocus) }
@@ -518,7 +522,7 @@ function App() {
       }
     }} className={`app-shell ${controlsOnLeft ? 'controls-left' : 'controls-right'} ${focusWriting ? 'focus-writing' : ''}`}>
       <div className="landscape-scene" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}images/chapel-light.webp`} alt="" width="1672" height="941" /></div>
-      <div className="room-identity" aria-hidden={focusWriting}><p>Scripture, by hand.</p></div>
+      <div className="room-identity" aria-hidden={focusWriting}><p>Scripture, by hand.</p><span className="phone-note">Best on desktop or tablet. Works on phones, too.</span></div>
       <aside className="control-rail" inert={Boolean(panel)} aria-label="Writing controls">
         <button ref={previousButtonRef} type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label={versesPerView === 2 ? 'Previous verses' : 'Previous verse'}>
           <ArrowUpIcon />
@@ -761,6 +765,7 @@ function App() {
               <div className="settings-group"><div className="setting-copy"><h2>Line guide</h2><p>Mark the line you are copying.</p></div><button className="line-guide-button" type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button></div>
               <div className="settings-group"><div className="setting-copy"><h2>Verses in view</h2><p>Next advances past the displayed verses.</p></div><div className="segmented-control" role="group" aria-label="Verses in view"><button type="button" className={versesPerView === 1 ? 'selected' : ''} aria-pressed={versesPerView === 1} onClick={() => setVersesPerView(1)}>One</button><button type="button" className={versesPerView === 2 ? 'selected' : ''} aria-pressed={versesPerView === 2} onClick={() => setVersesPerView(2)}>Two</button></div></div>
               <div className="dialog-note">
+                <p>Designed for desktop and tablet, with a phone-friendly layout. On iPhone or another phone, prop it beside your notebook and use the bottom controls.</p>
                 <p><strong>Keyboard controls</strong></p>
                 <p>A / D, Space, or arrows move through verses. Press G to go to a passage. Press B to bookmark.</p>
               </div>

@@ -1,0 +1,16 @@
+import puppeteer from 'puppeteer-core'
+import assert from 'node:assert/strict'
+const b=await puppeteer.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true})
+try{
+ for(const [width,height] of [[320,568],[375,667],[390,844],[430,932],[844,390],[768,1024],[1440,900]]){
+  const context=await b.createBrowserContext();const p=await context.newPage();await p.setViewport({width,height,isMobile:width<1000,hasTouch:width<1000,deviceScaleFactor:1});await p.goto(process.env.QA_URL||'http://127.0.0.1:4173/',{waitUntil:'networkidle0'});await p.waitForSelector('.verse.active');const phone=width<=600||height<500;const rect=async s=>p.$eval(s,e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,b:r.bottom}})
+  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));const next=await rect('.next-button');const back=await rect('.previous-button');if(phone){assert.ok(next.h>=48);assert.ok(next.b<=height);assert.ok(next.x<back.x);assert.ok(next.y>height/2);assert.ok(await p.$eval('.scripture-wrap',e=>e.clientWidth>innerWidth-50));}
+  await p.click('.next-button');assert.equal(await p.$eval('.verse.active sup',e=>e.textContent),'2');const before=await rect('.verse.active p');await p.click('.writing-mode-button');const focus=await rect('.verse.active p');assert.ok(Math.abs(focus.x-before.x)<2&&Math.abs(focus.y-before.y)<2,`anchor ${width}: ${JSON.stringify({before,focus})}`);assert.equal(await p.$('.reader-random'),null);await p.click('.next-button');assert.equal(await p.$eval('.verse.active sup',e=>e.textContent),'3');await p.click('.writing-mode-button');
+  await p.click('.setup-button');await p.evaluate(()=>{const x=[...document.querySelectorAll('.segmented-control button')].find(e=>e.textContent==='Left');x.click()});await p.click('[aria-label="Close settings"]');if(phone)assert.ok((await rect('.next-button')).x>(await rect('.previous-button')).x);
+  await p.click('.reference-picker');await new Promise(r=>setTimeout(r,300));if(phone){assert.notEqual(await p.evaluate(()=>document.activeElement?.tagName),'INPUT');const dialog=await rect('[role=dialog]');assert.ok(dialog.w>=width-2&&dialog.h>=height-2);assert.ok((await rect('.close-button')).h>=44)}
+  await p.type('[name=reference]','John 3:16');await p.keyboard.press('Enter');await p.waitForFunction(()=>!document.querySelector('[role=dialog]'));assert.match(await p.$eval('.reference-picker',e=>e.textContent),/John 3:16/);
+  if(width===390){await p.screenshot({path:'qa/phone-reader.png'});await p.click('.reference-picker');await new Promise(r=>setTimeout(r,300));await p.screenshot({path:'qa/phone-chooser.png'});await p.click('[aria-label="Close passage navigator"]');await p.evaluate(()=>{document.documentElement.requestFullscreen=undefined});await p.click('.writing-mode-button');await new Promise(r=>setTimeout(r,400));assert.ok(await p.$('.focus-writing'));await p.screenshot({path:'qa/phone-writing.png'})}
+  if(height===390)await p.screenshot({path:'qa/phone-landscape.png'});
+  await p.close();console.log(`PASS ${width}x${height}: overflow, navigation, writing anchor, hand mirroring, chooser and reference entry`)
+ }
+}finally{await b.close()}

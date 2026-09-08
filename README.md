@@ -29,6 +29,12 @@ The chooser provides a Continue action, three starter passages, grouped visual b
 
 Settings → **Import your own Bible text** accepts the documented JSON shape (12 MB maximum), with an example download. PDFs/EPUBs are not supported. Imports are stored in browser IndexedDB, never uploaded or published. Chapter and verse identifiers must be ordered positive integers; book IDs must be unique three-character uppercase alphanumeric IDs. Text is rendered as text, not HTML. Each file has its own content-derived position namespace. The latest imported file appears in the translation chooser. Keep your original file: clearing site data removes imported text. Only import text you have permission to use.
 
+## Phone layout
+
+Desktop and tablet remain the primary experience. Phones use a full-width reader and bottom Back/Next controls, mirrored for the writing hand. The normal screen includes “Best on desktop or tablet. Works on phones, too.” The note and Random verse disappear in writing mode. Fullscreen has a full-viewport fallback where browser fullscreen is unavailable. Phone passage/settings panels fill the screen and reserve safe-area padding; opening the chooser does not autofocus the text input and summon the software keyboard.
+
+Run `node scripts/phone_qa.mjs` for Chromium touch/viewport checks at phone portrait/landscape, tablet and desktop sizes. These are automated device-size simulations, not physical iPhone/Safari certification.
+
 ## Visual setting
 
 The reader defaults to one verse, with an optional two-verse view in Settings. A or Left Arrow goes back; D, Space, or Right Arrow advances past the displayed verses. A dismissible keyboard hint and verse-count preference save locally. The reader uses one compact row: passage/translation chooser, writing mode, and settings. Duplicate selectors and surrounding verses are removed. Next has a large free-hand target with Back separated above it; writing-hand preference mirrors the controls. Line guide is in settings. The reader is a bounded writing sheet within original Christian chapel imagery. A cross belongs to the architecture rather than UI decoration. The passage picker and settings share the same visual system; dialogs trap keyboard focus and return it to Scripture on dismissal. Focus fades out the landscape without moving the text. Background choices use cool mineral tones; Night uses midnight blue. All motion respects reduced-motion settings. The image is bundled locally and cached for offline use.

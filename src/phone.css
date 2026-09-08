@@ -1,0 +1,49 @@
+/* Phone layout: full-width Scripture and a free-hand dock. */
+.phone-note {display:none;}
+@media(max-width:600px), (max-width:1000px) and (max-height:500px) and (pointer:coarse) {
+ .app-shell,.app-shell.controls-right,.app-shell.focus-writing {inset:92px 0 0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;border-radius:12px 12px 0 0;box-shadow:none;overflow:hidden;}
+ .room-identity {left:20px;top:15px;right:16px;}
+ .room-identity p {font-size:25px;margin:0 0 6px;}
+ .room-identity .phone-note {display:block;font-size:11px;line-height:1.5;letter-spacing:0;color:#fff;max-width:310px;}
+ .landscape-scene {height:120px;}
+ .app-shell .reader-panel,.app-shell.controls-right .reader-panel {grid-column:1;grid-row:1;min-width:0;border-radius:12px 12px 0 0;grid-template-rows:102px minmax(0,1fr) 40px;}
+ .app-shell .control-rail,.app-shell.controls-right .control-rail,.app-shell.focus-writing .control-rail {position:relative;inset:auto;grid-column:1;grid-row:2;display:flex;flex-direction:row-reverse;align-items:stretch;justify-content:stretch;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);border-radius:0;background:var(--page);}
+ .app-shell.controls-right .control-rail {flex-direction:row;}
+ .app-shell .control-rail .rail-button {height:60px;min-height:60px;width:auto;flex-direction:row;justify-content:center;gap:12px;padding:10px;border-radius:7px;font-size:15px;touch-action:manipulation;}
+ .app-shell .control-rail .next-button {flex:2;background:var(--accent);color:var(--page);}
+ .app-shell .control-rail .previous-button {flex:1;border:1px solid var(--line);}
+ .control-rail svg {width:20px;height:20px;transform:rotate(-90deg);}
+ .app-shell .writing-tools {padding:6px 48px 6px 18px;gap:2px 8px;align-content:center;justify-content:flex-start;flex-wrap:wrap;}
+ .app-shell .writing-tools .writing-reference {flex-basis:100%;padding:0;min-width:0;font-size:13px;}
+ .app-shell .reference-picker {min-height:40px;max-width:100%;text-align:left;white-space:normal;}
+ .app-shell .writing-tools .writing-mode-button {min-height:44px;font-size:12px;padding:8px 10px;}
+ .app-shell .writing-tools .setup-button,.app-shell .reader-random {min-width:44px;min-height:44px;height:44px;}
+ .app-shell .reader-random {font-size:12px;padding:6px;}
+ .app-shell .page-ribbon {right:7px;top:0;width:40px;height:52px;}
+ .app-shell .scripture-wrap {padding:16px 22px 24px;min-width:0;scroll-padding-bottom:20px;overscroll-behavior:contain;}
+ .app-shell .verse.active {padding:10px 0 32px;}
+ .app-shell .verse.companion {padding-bottom:32px;}
+ .app-shell .verse p {max-width:none;overflow-wrap:anywhere;}
+ .app-shell .chapter-position {left:22px;right:22px;}
+ .shortcut-coach {display:none;}
+ .app-shell .dialog-backdrop {position:fixed;inset:0;padding:0;z-index:100;align-items:stretch;backdrop-filter:none;}
+ .app-shell .settings-dialog {width:100%;max-width:none;height:100dvh;max-height:100dvh;border-radius:0;padding:calc(16px + env(safe-area-inset-top,0px)) 20px calc(24px + env(safe-area-inset-bottom,0px));border:0;animation:none;overscroll-behavior:contain;}
+ .app-shell .settings-dialog>.dialog-heading {position:sticky;top:calc(-16px - env(safe-area-inset-top,0px));z-index:4;background:var(--page);padding:14px 0;border-bottom:1px solid var(--line);}
+ .app-shell .close-button {width:44px;height:44px;min-width:44px;}
+ .app-shell .settings-dialog input,.app-shell .settings-dialog select {font-size:16px;}
+ .app-shell .settings-dialog .segmented-control button {min-height:44px;}
+}
+@media(max-width:380px) {
+ .app-shell .writing-tools {gap:2px 4px;padding-left:12px;padding-right:44px;}
+ .app-shell .writing-tools .writing-mode-button {font-size:11px;padding:8px;}
+ .app-shell .reader-random {font-size:11px;}
+}
+@media(max-width:1000px) and (max-height:500px) and (pointer:coarse) {
+ .app-shell,.app-shell.controls-right,.app-shell.focus-writing {inset:0;}
+ .room-identity {display:none;}
+ .app-shell .reader-panel {grid-template-rows:56px minmax(0,1fr) 30px;}
+ .app-shell .writing-tools .writing-reference {flex-basis:auto;flex:1;}
+ .app-shell .writing-tools {flex-wrap:nowrap;}
+ .app-shell .control-rail .rail-button {height:48px;min-height:48px;}
+ .app-shell .control-rail {padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));}
+}
