@@ -5,6 +5,8 @@ import './writing-page.css'
 import './landscape.css'
 import './handwriting.css'
 import './chapel.css'
+import './book-browser.css'
+import { importInfo, readImport, storeImport } from './local-bible'
 
 type Verse = { number: number; text: string }
 type Chapter = { number: number; verses: Verse[] }
@@ -26,7 +28,7 @@ type Panel = 'navigate' | 'settings' | null
 type CanonicalPosition = { bookId: string; chapter: number; verse: number }
 type TranslationState = { position: CanonicalPosition; savedPlaces: { id: string; position: CanonicalPosition; savedAt: number }[] }
 type LibraryState = { translation?: string; translations?: Record<string, TranslationState> }
-const TRANSLATIONS: Record<string, string> = { WEB: 'bible.json', ASV1901: 'asv1901.json', BSB: 'bsb.json' }
+const TRANSLATIONS: Record<string, string> = { WEB: 'bible.json', ASV1901: 'asv1901.json', BSB: 'bsb.json', DRA: 'dra.json' }
 const LIBRARY_KEY = 'scripture-scribe-library-v3'
 function loadLibrary(): LibraryState {
   try { return JSON.parse(localStorage.getItem(LIBRARY_KEY) || '{}') || {} } catch { return {} }
@@ -45,6 +47,16 @@ function locate(bible: Bible, p?: CanonicalPosition): Position {
 function validPosition(bible: Bible, p: Position): boolean {
   return Boolean(p && bible.books[p.book]?.chapters[p.chapter]?.verses[p.verse])
 }
+const BOOK_GROUPS = [
+  { title: 'The Law', note: 'Beginnings and covenant', testament: 0, ids: ['GEN','EXO','LEV','NUM','DEU'] },
+  { title: 'History', note: 'The story of Israel', testament: 0, ids: ['JOS','JDG','RUT','1SA','2SA','1KI','2KI','1CH','2CH','EZR','NEH','EST'] },
+  { title: 'Poetry & Wisdom', note: 'Prayer, reflection and daily life', testament: 0, ids: ['JOB','PSA','PRO','ECC','SNG'] },
+  { title: 'Prophets', note: 'Warnings, hope and restoration', testament: 0, ids: ['ISA','JER','LAM','EZK','DAN','HOS','JOL','AMO','OBA','JON','MIC','NAM','HAB','ZEP','HAG','ZEC','MAL'] },
+  { title: 'Deuterocanonical books', note: 'Included in this Catholic edition', testament: 0, ids: ['TOB','JDT','WIS','SIR','BAR','1MA','2MA'] },
+  { title: 'Gospels & Acts', note: 'Jesus and the early church', testament: 1, ids: ['MAT','MRK','LUK','JHN','ACT'] },
+  { title: 'Letters', note: 'Faith in everyday life', testament: 1, ids: ['ROM','1CO','2CO','GAL','EPH','PHP','COL','1TH','2TH','1TI','2TI','TIT','PHM','HEB','JAS','1PE','2PE','1JN','2JN','3JN','JUD'] },
+  { title: 'Revelation', note: 'A vision of hope and renewal', testament: 1, ids: ['REV'] },
+]
 const STORAGE_KEY = 'scripture-scribe-state-v2'
 const LEGACY_STORAGE_KEY = 'scripture-scribe-settings-v1'
 const DEFAULT_POSITION: Position = { book: 0, chapter: 0, verse: 0 }
@@ -174,8 +186,11 @@ function resolveReference(input: string, bible: Bible): Position | null {
 function App() {
   const saved = useMemo(() => loadSavedState(), [])
   const initialLibrary = useMemo(loadLibrary, [])
+  const [personalBible, setPersonalBible] = useState(importInfo)
+  const [importError, setImportError] = useState('')
+  const [importBusy, setImportBusy] = useState(false)
   const library = useRef(initialLibrary)
-  const [translation, setTranslation] = useState(() => initialLibrary.translation && TRANSLATIONS[initialLibrary.translation] ? initialLibrary.translation : 'WEB')
+  const [translation, setTranslation] = useState(() => initialLibrary.translation && (TRANSLATIONS[initialLibrary.translation] || initialLibrary.translation === personalBible?.id) ? initialLibrary.translation : 'WEB')
   const carryPosition = useRef<CanonicalPosition | undefined>(undefined)
   const [positionNotice, setPositionNotice] = useState('')
   const [saveError, setSaveError] = useState(false)
@@ -201,6 +216,8 @@ function App() {
   const [theme, setTheme] = useState<Theme>(BACKGROUNDS.some(option => option.value === saved.theme) ? saved.theme : 'paper')
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(saved.savedPlaces ?? [])
   const [panel, setPanel] = useState<Panel>(null)
+  const [browseTestament, setBrowseTestament] = useState(0)
+  const [expandedBook, setExpandedBook] = useState<number | null>(null)
   const [referenceQuery, setReferenceQuery] = useState('')
   const activeVerseRef = useRef<HTMLElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -210,11 +227,11 @@ function App() {
     let cancelled = false
     setLoadError(false)
     setBible(null)
-    fetch(`${import.meta.env.BASE_URL}data/${TRANSLATIONS[translation]}`)
-      .then((response) => {
-        if (!response.ok) throw new Error('Bible text did not load.')
-        return response.json() as Promise<Bible>
-      })
+    const loading = translation.startsWith('LOCAL_') ? readImport(translation) : fetch(`${import.meta.env.BASE_URL}data/${TRANSLATIONS[translation]}`).then(response => {
+      if (!response.ok) throw new Error('Bible text did not load.')
+      return response.json() as Promise<Bible>
+    })
+    loading
       .then((data) => {
         if (cancelled) return
         const stored = library.current.translations?.[translation]
@@ -330,9 +347,11 @@ function App() {
 
   const openNavigator = useCallback(() => {
     setDraftPosition(position)
+    setBrowseTestament(BOOK_GROUPS.some(group => group.testament === 1 && group.ids.includes(bible?.books[position.book]?.id ?? '')) ? 1 : 0)
+    setExpandedBook(null)
     setReferenceQuery('')
     setPanel('navigate')
-  }, [position])
+  }, [position, bible])
 
   const toggleBookmark = useCallback(() => {
     const existing = savedPlaces.find(place => samePosition(place.position, position))
@@ -393,7 +412,7 @@ function App() {
         return
       }
       if (panel && event.key === 'Tab') {
-        const controls = Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"] button, [role="dialog"] input, [role="dialog"] select, [role="dialog"] a')).filter(e => !e.hasAttribute('disabled') && e.offsetParent !== null)
+        const controls = Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"] button, [role="dialog"] input, [role="dialog"] select, [role="dialog"] a, [role="dialog"] summary')).filter(e => !e.hasAttribute('disabled') && e.offsetParent !== null)
         const first = controls[0], last = controls.at(-1)
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
@@ -460,6 +479,8 @@ function App() {
   const atEnd = position.book === finalBook && position.chapter === finalChapter && position.verse + visibleVerses.length - 1 === finalVerse
   const currentBookmark = savedPlaces.find((place) => samePosition(place.position, position))
   const parsedReference = referenceQuery ? resolveReference(referenceQuery, bible) : null
+  const displayGroups = [...BOOK_GROUPS, { title: 'Other imported books', note: 'From your personal file', testament: 0, ids: bible.books.filter(book => !BOOK_GROUPS.some(group => group.ids.includes(book.id))).map(book => book.id) }]
+  const homePosition = randomReturn ?? position
   const draftBook = bible.books[draftPosition.book]
   const draftChapter = draftBook.chapters[draftPosition.chapter]
 
@@ -514,7 +535,8 @@ function App() {
           <BookmarkIcon filled={Boolean(currentBookmark && !saveError)} />
         </button>
         <div className="writing-tools">
-          <span className="writing-reference"><button className="reference-picker" type="button" onClick={openNavigator} aria-haspopup="dialog" aria-label="Choose passage or translation">{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation}{randomReturn ? ' · Random' : ''}<ChevronDownIcon /></button></span>
+          <span className="writing-reference"><button className="reference-picker" type="button" onClick={openNavigator} aria-haspopup="dialog" aria-label="Choose passage or translation">{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation.startsWith('LOCAL_') ? 'Local' : translation}{randomReturn ? ' · Random' : ''}<ChevronDownIcon /></button></span>
+          {!focusWriting && <button type="button" className="reader-random" onClick={randomVerse}>Random verse</button>}
           <button type="button" className="writing-mode-button" aria-pressed={focusWriting} onClick={focusWriting ? exitWriting : enterWriting}>{focusWriting ? 'Exit writing mode' : 'Enter writing mode'}</button>
           <button type="button" className="icon-button setup-button" onClick={() => setPanel('settings')} aria-label="Open settings"><SettingsIcon /></button>
           {positionNotice && <span role="status">{positionNotice}</span>}
@@ -586,13 +608,17 @@ function App() {
                 <button type="button" className="close-button" onClick={() => setPanel(null)} aria-label="Close passage navigator">×</button>
               </div>
 
+              <button type="button" className="continue-place" onClick={() => goTo(homePosition)}>Continue at {getReference(bible, homePosition)}<span>Your saved place →</span></button>
               <label className="navigator-translation">Bible translation
                 <select name="navigator-translation" value={translation} onChange={event => { setPanel(null); setTranslation(event.target.value) }}>
+                  {personalBible && <option value={personalBible.id}>{personalBible.name} · Personal import</option>}
                   <option value="WEB">World English Bible</option>
+                  <option value="DRA">Douay-Rheims 1899 · Catholic</option>
                   <option value="BSB">Berean Standard Bible</option>
                   <option value="ASV1901">American Standard Version (1901)</option>
                 </select>
               </label>
+              {translation === 'DRA' && <p className="random-note">Catholic edition · Traditional English. Psalm and verse numbering can differ from other editions.</p>}
               <button type="button" className="restore-hint random-verse" onClick={randomVerse}>Write a random verse</button>
               {randomReturn ? <button type="button" className="restore-hint return-place" onClick={() => goTo(randomReturn)}>Return to saved place · {getReference(bible, randomReturn)}</button> : null}
               <p className="random-note">Random verses won’t replace your saved place. Reloading returns you to it.</p>
@@ -616,7 +642,27 @@ function App() {
                 </div>
               )}
 
-              <div className="browse-heading"><span>Or browse</span></div>
+              <section className="starting-points" aria-labelledby="starting-title">
+                <h2 id="starting-title">Not sure where to begin?</h2>
+                <div>{[{ ref: translation === 'DRA' ? 'Psalms 22:1' : 'Psalms 23:1', label: translation === 'DRA' ? 'Psalm 22' : 'Psalm 23', note: 'Trust and care' }, { ref: 'John 1:1', label: 'John 1', note: 'An introduction to Jesus' }, { ref: 'Matthew 5:1', label: 'Matthew 5', note: 'The Sermon on the Mount' }].filter(item => resolveReference(item.ref, bible)).map(item => <button type="button" key={item.ref} onClick={() => { const target = resolveReference(item.ref, bible); if (target) goTo(target) }}><strong>{item.label}</strong><span>{item.note}</span></button>)}</div>
+              </section>
+              <section className="book-browser" aria-labelledby="books-title">
+                <h2 id="books-title">Browse the books</h2>
+                <div className="testament-tabs" role="group" aria-label="Testament">
+                  {(['Old Testament', 'New Testament'] as const).map((label, index) => <button key={label} type="button" aria-pressed={browseTestament === index} onClick={() => { setBrowseTestament(index); setExpandedBook(null) }}>{label}</button>)}
+                </div>
+                {displayGroups.filter(group => group.testament === browseTestament && bible.books.some(book => group.ids.includes(book.id))).map(group => <section className="book-group" key={group.title}>
+                  <h3>{group.title}<span>{group.note}</span></h3>
+                  <div className="book-grid">{bible.books.map((item, index) => ({item,index})).filter(({item}) => group.ids.includes(item.id)).map(({item,index}) => <div className={`book-entry ${expandedBook === index ? 'expanded' : ''}`} key={item.id}>
+                    <button type="button" className="book-cover" aria-expanded={expandedBook === index} aria-controls={`chapters-${item.id}`} onClick={() => setExpandedBook(expandedBook === index ? null : index)}>
+                      <strong>{item.name}</strong><span>{item.chapters.length} {item.chapters.length === 1 ? 'chapter' : 'chapters'}{homePosition.book === index ? ' · Your place' : ''}</span>
+                    </button>
+                    {expandedBook === index && <div className="chapter-browser" id={`chapters-${item.id}`}><p>Choose a chapter to start writing.</p><div className="chapter-grid">{item.chapters.map((ch, ci) => <button type="button" key={ch.number} aria-label={`${item.name} ${ch.number}${homePosition.book === index && homePosition.chapter === ci ? ' · Your place' : ''}`} aria-current={homePosition.book === index && homePosition.chapter === ci ? 'location' : undefined} onClick={() => goTo({book:index, chapter:ci, verse:0})}>{ch.number}</button>)}</div></div>}
+                  </div>)}</div>
+                </section>)}
+              </section>
+              <details className="specific-passage"><summary>Choose a specific verse</summary>
+
               <div className="passage-selectors three-up">
                 <label>
                   <span>Book</span>
@@ -638,6 +684,8 @@ function App() {
                 </label>
               </div>
               <button type="button" className="primary-button" onClick={() => goTo(draftPosition)}>Go to {getReference(bible, draftPosition)}</button>
+
+              </details>
 
               <section className="saved-places-section" aria-labelledby="saved-places-title">
                 <div className="saved-places-heading">
@@ -718,7 +766,19 @@ function App() {
               </div>
               {shortcutHintDismissed && <button type="button" className="restore-hint" onClick={() => setShortcutHintDismissed(false)}>Show keyboard tip again</button>}
               <button type="button" className="primary-button" onClick={() => setPanel(null)}>Return to writing</button>
-              <p className="copyright-note">{bible.translation.notice} <a href={bible.translation.source} target="_blank" rel="noreferrer">Translation source</a></p>
+              <details className="personal-import"><summary>Import your own Bible text</summary>
+                <p>JSON only, up to 12 MB. Use text you have permission to use. Files stay in this browser; clearing browser data removes them. PDF and EPUB are not supported.</p>
+                <a href={`${import.meta.env.BASE_URL}data/import-example.json`} download>Download example format</a>
+                <label>Choose Bible JSON<input type="file" accept=".json,application/json" disabled={importBusy} onChange={async event => {
+                  const file = event.target.files?.[0]; if (!file) return
+                  event.target.value = ''; setImportError(''); setImportBusy(true)
+                  try { const info = await storeImport(file); setPersonalBible(info); setTranslation(info.id); setPanel(null) }
+                  catch (error) { setImportError(error instanceof Error ? error.message : 'Import failed. Your existing text has not changed.') }
+                  finally { setImportBusy(false) }
+                }} /></label>
+                {importBusy && <p role="status">Checking and saving your file…</p>}{importError && <p role="alert">{importError}</p>}
+              </details>
+              <p className="copyright-note">{bible.translation.notice} {bible.translation.source && <a href={bible.translation.source} target="_blank" rel="noreferrer">Translation source</a>}</p>
             </section>
           )}
         </div>

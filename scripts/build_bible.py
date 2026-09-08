@@ -117,6 +117,7 @@ def main() -> None:
         "ASV1901": ("eng-asv", "American Standard Version (1901)", "asv1901.json", "Public domain. https://ebible.org/asv/copyright.htm"),
         "BSB": ("engbsb", "Berean Standard Bible", "bsb.json", "Dedicated to the public domain (CC0), April 30, 2023. https://berean.bible/terms.htm"),
     }
+    specs["DRA"] = ("engDRA", "Douay-Rheims 1899 (Catholic)", "dra.json", "Public domain. Douay-Rheims American Edition of 1899, translated from the Latin Vulgate. Source numbering is preserved.")
     source_id, name, filename, notice = specs[translation]
     source = ROOT / "source-data" / "usfx" / f"{source_id}_usfx.xml"
     if not source.exists():
@@ -129,11 +130,16 @@ def main() -> None:
     tree = ET.parse(source)
     root = tree.getroot()
     by_id = {book.attrib.get("id"): book for book in root.findall("book")}
-    missing = [book_id for book_id, _ in BOOKS if book_id not in by_id]
+    selected_books = BOOKS
+    if translation == "DRA":
+        extras = [("TOB", "Tobit"), ("JDT", "Judith"), ("WIS", "Wisdom"), ("SIR", "Sirach (Ecclesiasticus)"), ("BAR", "Baruch"), ("1MA", "1 Maccabees"), ("2MA", "2 Maccabees")]
+        BOOK_NAMES.update(extras)
+        selected_books = BOOKS[:39] + extras + BOOKS[39:]
+    missing = [book_id for book_id, _ in selected_books if book_id not in by_id]
     if missing:
         raise SystemExit(f"Missing books: {', '.join(missing)}")
 
-    books = [extract_book(by_id[book_id]) for book_id, _ in BOOKS]
+    books = [extract_book(by_id[book_id]) for book_id, _ in selected_books]
     payload = {
         "translation": {
             "id": translation,

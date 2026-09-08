@@ -6,7 +6,7 @@ A simple web companion for handwriting Scripture. No account, backend profile, a
 
 Public MVP: https://budhennekes.github.io/scripture-writing/
 
-- Choose WEB, Berean Standard Bible (BSB), or American Standard Version (1901).
+- Choose WEB, Berean Standard Bible (BSB), American Standard Version (1901), or Douay-Rheims 1899 (Catholic).
 - Enter a passage such as `John 3:16`, or browse by book, chapter, and verse.
 - Write on paper. Use Space, arrows, or the large Next control to advance.
 - Choose your writing hand in settings to position controls on the other side.
@@ -17,11 +17,17 @@ Public MVP: https://budhennekes.github.io/scripture-writing/
 
 Your place and bookmarks are stored in this browser, separately for each translation. They do not sync between devices; clearing browser storage removes them. Moving from the local prototype to the public URL does not transfer local saves. Focus and line guide are session controls. Offline support is available after a successful online load and service-worker installation. Browser support for fullscreen and screen wake lock varies.
 
-All bundled editions contain the 66-book Protestant canon. They do not include Deuterocanonical books. Verse numbering can differ between translations; the app uses reference-based positions rather than assuming matching array offsets.
+WEB, BSB and ASV contain the 66-book Protestant canon. Douay-Rheims 1899 contains all 73 Catholic books, including the seven Deuterocanonical books and the longer Esther and Daniel texts. This traditional-language edition is public domain: https://ebible.org/engDRA/copyright.htm. Its original Psalm and verse numbering is preserved; the suggested shepherd psalm opens Psalm 22 rather than Psalm 23. Verse numbering can differ between translations; the app uses reference-based positions rather than assuming matching array offsets.
 
 ## Random verse
 
-Open the passage chooser and select **Write a random verse**. This draws from the current translation, excluding the currently displayed starting verse. The one/two-verse preference still applies. Random exploration and its Next/Back navigation do not overwrite your saved sequential place. Use **Return to saved place** in the chooser, or reload to resume it. Bookmarks made while exploring are retained. Choosing a specific passage ends exploration and saves that new position.
+Select **Random verse** above the reader (hidden in writing mode), or open the passage chooser and select **Write a random verse**. This draws from the current translation, excluding the currently displayed starting verse. The one/two-verse preference still applies. Random exploration and its Next/Back navigation do not overwrite your saved sequential place. Use **Return to saved place** in the chooser, or reload to resume it. Bookmarks made while exploring are retained. Choosing a specific passage ends exploration and saves that new position.
+
+## Visual book browser and personal imports
+
+The chooser provides a Continue action, three starter passages, grouped visual books, and chapter buttons that open directly at the chapter’s first source verse. Browsing does not save a new position until a passage is selected. Specific verse selectors remain in a disclosure; reference search is still available. No copied-work percentage is inferred from navigation.
+
+Settings → **Import your own Bible text** accepts the documented JSON shape (12 MB maximum), with an example download. PDFs/EPUBs are not supported. Imports are stored in browser IndexedDB, never uploaded or published. Chapter and verse identifiers must be ordered positive integers; book IDs must be unique three-character uppercase alphanumeric IDs. Text is rendered as text, not HTML. Each file has its own content-derived position namespace. The latest imported file appears in the translation chooser. Keep your original file: clearing site data removes imported text. Only import text you have permission to use.
 
 ## Visual setting
 
