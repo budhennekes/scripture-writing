@@ -1,0 +1,94 @@
+/* A typeset writing page. Motion belongs to the tools, never the text. */
+.app-shell {isolation:isolate;}
+.app-shell .reader-panel {position:relative;grid-template-rows:92px 64px minmax(0,1fr) 74px;border-radius:0;}
+.topbar {padding:0 80px 0 40px;}
+.scribe-wordmark {font-size:27px;letter-spacing:-.045em;font-weight:400;}
+.identity-rule {background:var(--line);}
+.writing-tools {padding:8px 80px 8px 40px;border:0;gap:12px;flex-wrap:nowrap;}
+.writing-tools select {width:94px;border:0;background:transparent;color:var(--muted);font-size:13px;}
+.writing-tools button {min-height:44px;border:0;font-size:13px;border-radius:5px;}
+.writing-tools .writing-mode-button {margin-left:auto;background:var(--ink);color:var(--page);padding:12px 18px;min-width:168px;}
+.writing-tools .writing-mode-button:active {transform:translateY(1px);}
+.writing-tools .line-guide-button {color:var(--muted);}
+.writing-tools .line-guide-button:hover {background:var(--accent-soft);}
+.writing-tools .writing-reference {display:block;position:absolute;top:105px;left:clamp(34px,7vw,110px);font-family:'Newsreader Variable',Georgia,serif;font-style:italic;font-size:20px;letter-spacing:.01em;color:var(--muted);width:auto;white-space:nowrap;pointer-events:none;}
+.scripture-wrap {padding-top:104px;gap:0;}
+.chapter-label {display:none;}
+.scripture {line-height:1.52;letter-spacing:-.025em;font-weight:400;}
+.verse {grid-template-columns:24px minmax(0,1fr);gap:20px;}
+.verse p {max-width:32ch;}
+.verse.active {padding:30px 0 36px;}
+.verse.active sup {font-family:'Newsreader Variable',Georgia,serif;font-size:16px;font-style:italic;padding-top:12px;color:var(--muted);}
+/* Context keeps a fixed slot, so an ordinary verse change never relocates ink. */
+.verse.previous-context,.previous-placeholder,.focus-writing .verse.previous-context {height:76px;padding:0;overflow:hidden;}
+.verse:not(.active) {color:var(--muted);}
+.verse:not(.active) p {font-size:.48em;max-width:52ch;line-height:1.5;}
+.verse:not(.active) sup {font-size:10px;}
+.verse.previous-context p {display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.control-rail {opacity:.8;}
+.rail-button {font-weight:400;}
+.page-ribbon {position:absolute;z-index:4;right:32px;top:0;width:44px;height:76px;border-radius:0;color:var(--accent);background:transparent;}
+.page-ribbon::before {content:'';position:absolute;inset:0 10px 10px;background:var(--accent-soft);clip-path:polygon(0 0,100% 0,100% 100%,50% 84%,0 100%);pointer-events:none;}
+.page-ribbon.selected,.page-ribbon.selected:hover {background:transparent;color:var(--page);}
+.page-ribbon.selected::before {background:var(--accent);}
+.page-ribbon svg {position:relative;width:18px;height:18px;}
+.page-ribbon:hover {background:transparent;}
+.page-ribbon:hover::before {background:var(--line);}
+.reader-footer {padding:39px 40px 0;align-items:center;}
+.chapter-position {inset:0 40px auto;font-size:12px;}
+.chapter-position-line {height:1px;margin-bottom:12px;}
+.chapter-position-line span {position:relative;background:var(--accent);}
+.chapter-position-line span::after {content:'';position:absolute;right:0;top:-2px;width:5px;height:5px;background:var(--accent);border-radius:50%;}
+.chapter-position p {letter-spacing:.015em;}
+.keyboard-hint,.saved-status {font-size:11px;color:var(--muted);}
+.focus-writing {position:fixed;inset:0;z-index:20;}
+.focus-writing .topbar {visibility:hidden;}
+.focus-writing .writing-tools select {visibility:hidden;}
+.focus-writing .writing-tools .writing-mode-button {background:transparent;color:var(--muted);border:1px solid var(--line);}
+.focus-writing .writing-tools .writing-mode-button::after {content:'Esc';margin-left:12px;font:10px ui-monospace,monospace;border:1px solid var(--line);padding:3px 4px;border-radius:3px;}
+.focus-writing .writing-tools .writing-reference {display:block;}
+.focus-writing .page-ribbon::before {background:var(--accent-soft);}
+.focus-writing .page-ribbon.selected::before {background:var(--accent);}
+.focus-writing .verse:not(.active) {visibility:hidden;}
+.topbar,.verse:not(.active),.writing-tools select {transition:opacity 180ms ease-out;}
+@media(min-width:1400px) {
+ .scripture-wrap {padding-left:max(110px,calc((100vw - 1080px)/2));padding-right:max(110px,calc((100vw - 1080px)/2));}
+ .writing-tools .writing-reference {left:max(110px,calc((100vw - 1080px)/2));}
+}
+@media(max-width:1050px) {
+ .topbar {padding-left:24px;padding-right:72px;}
+ .writing-tools {padding-left:24px;padding-right:24px;}
+ .writing-tools .writing-reference {left:40px;}
+ .scripture-wrap {padding-top:104px;}
+}
+@media(max-width:720px) {
+ .app-shell,.app-shell.controls-right {grid-template-columns:74px minmax(0,1fr);}
+ .app-shell.controls-right {grid-template-columns:minmax(0,1fr) 74px;}
+ .app-shell .reader-panel {grid-template-rows:70px 108px minmax(0,1fr) 64px;}
+ .topbar {padding-left:12px;padding-right:48px;}
+ .fullscreen-button {display:none;}
+ .page-ribbon {right:4px;height:62px;}
+ .writing-tools {padding:0 14px;gap:4px;flex-wrap:wrap;align-content:center;}
+ .writing-tools select {width:78px;min-height:44px;font-size:14px;}
+ .writing-tools .writing-mode-button {font-size:13px;min-width:0;padding:10px;margin-left:0;}
+ .writing-tools .line-guide-button {font-size:13px;padding:8px;}
+ .writing-tools .writing-reference {left:22px;top:136px;font-size:19px;}
+ .scripture-wrap {padding:80px 22px 24px;}
+ .scripture {line-height:1.42;}
+ .verse {grid-template-columns:1fr;gap:8px;}
+ .verse.active {padding-top:22px;}
+ .verse.active sup {padding:0;font-size:15px;}
+ .verse.previous-context,.previous-placeholder,.focus-writing .verse.previous-context {height:54px;}
+ .verse.previous-context sup {display:none;}
+ .verse:not(.active) p {font-size:.48em;}
+ .focus-writing .writing-tools .writing-mode-button::after {display:none;}
+ .reader-footer {padding:0 16px;}
+ .chapter-position {left:16px;right:16px;font-size:11px;}
+}
+@media(max-height:600px) {
+ .app-shell .reader-panel {grid-template-rows:62px 54px minmax(0,1fr) 54px;}
+ .scripture-wrap {padding-top:44px;}
+ .writing-tools .writing-reference {top:65px;}
+ .verse.previous-context,.previous-placeholder,.focus-writing .verse.previous-context {height:28px;}
+}
+@media(prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none!important;transition:none!important;}}

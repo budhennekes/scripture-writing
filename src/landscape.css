@@ -1,0 +1,64 @@
+/* Landscape is a threshold, not a backdrop behind Scripture. */
+:root {--ink:#243345;--muted:#626d7c;--faint:#747d89;--accent:#526b8c;--accent-soft:rgb(82 107 140 / 8%);--line:rgb(36 51 69 / 14%);--page-deep:#edf0f4;}
+:root[data-theme='gray'] {--page:#edf0f4;--page-deep:#e1e6ec;}
+:root[data-theme='sage'] {--page:#edf1ed;--page-deep:#dfe7e2;--accent:#516e64;}
+:root[data-theme='night'] {--page:#19222e;--page-deep:#222e3d;--ink:#edf0f6;--muted:#abb7c9;--faint:#95a4b9;--accent:#b5c6e2;--accent-soft:rgb(181 198 226 / 8%);--line:rgb(181 198 226 / 18%);}
+:root[data-theme='night'] .reader-panel {background:transparent;}
+.landscape-scene {position:fixed;inset:0 0 auto;height:248px;z-index:-1;overflow:hidden;pointer-events:none;background:#2e3d56;opacity:1;transition:opacity 420ms ease;}
+.landscape-scene img {width:100%;height:100%;object-fit:cover;object-position:50% 57%;transform:scale(1);transition:transform 650ms cubic-bezier(.2,.7,.2,1);}
+.landscape-scene::after {content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgb(13 24 42 / 52%),rgb(13 24 42 / 12%));}
+.app-shell {background:transparent;}
+.app-shell .reader-panel {background:transparent;grid-template-rows:116px 76px minmax(0,1fr) 74px;}
+.control-rail,.controls-right .control-rail {background:linear-gradient(180deg,transparent 192px,var(--page) 192px);opacity:1;}
+.topbar {background:transparent;color:#fff;}
+.scribe-wordmark {font-size:34px;color:#fff;letter-spacing:-.04em;}
+.wordmark-period {color:#d6c2bc;}
+.passage-button,.passage-button strong,.passage-button svg,.topbar .icon-button {color:#fff;}
+.identity-rule {background:rgb(255 255 255 / 30%);}
+.topbar button:hover {background:rgb(255 255 255 / 12%);}
+.topbar :focus-visible {outline-color:white;}
+.writing-tools {background:transparent;}
+.writing-tools select {background:#23334be8;color:#fff;border:1px solid rgb(255 255 255 / 25%);border-radius:6px;}
+.writing-tools .line-guide-button {color:white;}
+.writing-tools .line-guide-button:hover,.writing-tools .line-guide-button[aria-pressed='true'] {background:rgb(255 255 255 / 14%);color:white;}
+.writing-tools .writing-mode-button {background:#edf1f8;color:#243345;box-shadow:0 2px 8px rgb(10 21 39 / 12%);transition:transform 180ms ease;}
+.writing-tools .writing-mode-button:hover {transform:translateY(-2px);}
+.writing-tools .writing-reference {top:112px;}
+.scripture-wrap {background:var(--page);border-radius:22px 0 0 0;padding-top:88px;}
+.controls-right .scripture-wrap {border-radius:0 22px 0 0;}
+.reader-footer {background:var(--page);}
+.page-ribbon {color:white;}
+.page-ribbon::before {background:rgb(234 226 223 / 18%);}
+.page-ribbon.selected::before {background:#c9ada8;}
+.page-ribbon.selected {color:#28364b;}
+.chapter-position-line span::after {width:6px;height:6px;top:-2.5px;}
+.settings-dialog {border-radius:16px;}
+.focus-writing {background:var(--page);}
+.focus-writing .landscape-scene {opacity:0;}
+.focus-writing .landscape-scene img {transform:scale(1.035);}
+.focus-writing .control-rail {background:var(--page);}
+.focus-writing .writing-tools .line-guide-button {color:var(--muted);}
+.focus-writing .writing-tools .line-guide-button:hover {background:var(--accent-soft);}
+.focus-writing .writing-tools .writing-mode-button {color:var(--muted);background:transparent;box-shadow:none;}
+.focus-writing .page-ribbon {color:var(--accent);}
+.focus-writing .page-ribbon.selected {color:var(--page);}
+@media(max-width:1050px) {.scribe-wordmark {font-size:28px;}.scripture-wrap {padding-top:88px;}}
+@media(max-width:720px) {
+ .app-shell .reader-panel {grid-template-rows:70px 108px minmax(0,1fr) 64px;}
+ .landscape-scene {height:216px;}
+ .landscape-scene img {object-position:78% 50%;}
+ .control-rail,.controls-right .control-rail {background:linear-gradient(180deg,transparent 178px,var(--page) 178px);}
+ .writing-tools .writing-reference {top:136px;}
+ .scripture-wrap {padding-top:80px;border-radius:16px 0 0 0;}
+ .controls-right .scripture-wrap {border-radius:0 16px 0 0;}
+ .writing-tools select {background:#23334b;font-size:13px;}
+ .writing-tools .writing-mode-button {padding:10px;font-size:12px;}
+}
+@media(max-height:600px) {
+ .app-shell .reader-panel {grid-template-rows:62px 54px minmax(0,1fr) 54px;}
+ .landscape-scene {height:144px;}
+ .control-rail,.controls-right .control-rail {background:linear-gradient(180deg,transparent 116px,var(--page) 116px);}
+ .scripture-wrap {padding-top:44px;}
+ .writing-tools .writing-reference {top:65px;}
+}
+@media(prefers-reduced-motion:reduce) {*,*::before,*::after {transition:none!important;animation:none!important;}}

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import './redesign.css'
+import './writing-page.css'
+import './landscape.css'
 
 type Verse = { number: number; text: string }
 type Chapter = { number: number; verses: Verse[] }
@@ -180,6 +182,7 @@ function App() {
   const [positionNotice, setPositionNotice] = useState('')
   const [saveError, setSaveError] = useState(false)
   const [focusWriting, setFocusWriting] = useState(false)
+  const writingFullscreen = useRef(false)
   const previousButtonRef = useRef<HTMLButtonElement>(null)
   const nextButtonRef = useRef<HTMLButtonElement>(null)
   const bookmarkButtonRef = useRef<HTMLButtonElement>(null)
@@ -334,12 +337,44 @@ function App() {
     move(direction)
   }, [move])
 
+  const exitWriting = useCallback(() => {
+    setFocusWriting(false)
+    if (writingFullscreen.current && document.fullscreenElement) void document.exitFullscreen().catch(() => {})
+    writingFullscreen.current = false
+    activeVerseRef.current?.focus({ preventScroll: true })
+  }, [])
+
+  useEffect(() => {
+    const changed = () => {
+      if (writingFullscreen.current && !document.fullscreenElement) {
+        writingFullscreen.current = false
+        setFocusWriting(false)
+        activeVerseRef.current?.focus({ preventScroll: true })
+      }
+    }
+    document.addEventListener('fullscreenchange', changed)
+    return () => document.removeEventListener('fullscreenchange', changed)
+  }, [])
+
+  const enterWriting = () => {
+    setPreviousHeight(activeVerseRef.current?.previousElementSibling?.getBoundingClientRect().height ?? 0)
+    setFocusWriting(true)
+    setPanel(null)
+    void ensureWakeLock()
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      writingFullscreen.current = true
+      void document.documentElement.requestFullscreen().catch(() => {
+        writingFullscreen.current = false // Keep the full-viewport fallback usable.
+      })
+    }
+  }
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || event.repeat) return
       if (event.key === 'Escape') {
         setPanel(null)
-        if (!panel) setFocusWriting(false)
+        if (!panel) exitWriting()
         return
       }
       const target = event.target as HTMLElement
@@ -367,7 +402,7 @@ function App() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [keyboardMove, openNavigator, panel, toggleBookmark])
+  }, [keyboardMove, openNavigator, panel, toggleBookmark, exitWriting])
 
   const toggleFullscreen = async () => {
     try {
@@ -431,10 +466,11 @@ function App() {
   return (
     <main onClick={event => {
       // Pointer toolbar actions hand Space back to reading; Tab/Space remain native.
-      if (event.detail > 0 && (event.target as HTMLElement).closest('.writing-tools button, .topbar button, .rail-button')) {
+      if (event.detail > 0 && (event.target as HTMLElement).closest('.writing-tools button, .topbar button, .rail-button, .page-ribbon')) {
         activeVerseRef.current?.focus({ preventScroll: true })
       }
     }} className={`app-shell ${controlsOnLeft ? 'controls-left' : 'controls-right'} ${focusWriting ? 'focus-writing' : ''}`}>
+      <div className="landscape-scene" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}images/still-coast.webp`} alt="" width="1672" height="941" /></div>
       <aside className="control-rail" aria-label="Writing controls">
         <button ref={previousButtonRef} type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label="Previous verse">
           <ArrowUpIcon />
@@ -447,6 +483,9 @@ function App() {
       </aside>
 
       <section className="reader-panel">
+        <button ref={bookmarkButtonRef} type="button" className={`icon-button bookmark-button page-ribbon ${currentBookmark && !saveError ? 'selected' : ''}`} onClick={toggleBookmark} aria-label={currentBookmark ? 'Remove bookmark' : 'Save this verse'}>
+          <BookmarkIcon filled={Boolean(currentBookmark && !saveError)} />
+        </button>
         <header className="topbar" inert={focusWriting}>
           <div className="reader-identity">
             <a className="scribe-wordmark" href={import.meta.env.BASE_URL} aria-label="Homepage">The writing room<span className="wordmark-period" aria-hidden="true">.</span></a>
@@ -458,9 +497,6 @@ function App() {
           </button>
           </div>
           <div className="topbar-actions">
-            <button ref={bookmarkButtonRef} type="button" className={`icon-button bookmark-button ${currentBookmark ? 'selected' : ''}`} onClick={toggleBookmark} aria-label={currentBookmark ? 'Remove bookmark' : 'Save this verse'}>
-              <BookmarkIcon filled={Boolean(currentBookmark)} />
-            </button>
             <button type="button" className="icon-button fullscreen-button" onClick={toggleFullscreen} aria-label="Toggle fullscreen">
               <ExpandIcon />
             </button>
@@ -475,11 +511,8 @@ function App() {
             <option value="WEB">WEB</option><option value="ASV1901">ASV 1901</option><option value="BSB">BSB</option>
           </select>
           <span className="writing-reference">{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation}</span>
-          <button type="button" className="writing-mode-button" aria-pressed={focusWriting} onClick={() => {
-            if (!focusWriting) setPreviousHeight(activeVerseRef.current?.previousElementSibling?.getBoundingClientRect().height ?? 0)
-            setFocusWriting(!focusWriting)
-          }}>{focusWriting ? 'Exit writing mode' : 'Enter writing mode'}</button>
-          <button type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button>
+          <button type="button" className="writing-mode-button" aria-pressed={focusWriting} onClick={focusWriting ? exitWriting : enterWriting}>{focusWriting ? 'Exit writing mode' : 'Enter writing mode'}</button>
+          <button className="line-guide-button" type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button>
           {positionNotice && <span role="status">{positionNotice}</span>}
           {lineGuide && <span>Click a line to mark your place.</span>}
         </div>
@@ -490,7 +523,7 @@ function App() {
             <div className="chapter-caption"><span>Scripture, by hand.</span><span>Verse {currentVerse.number} of {lastVerseNumber}</span></div>
           </div>
           <div className="scripture" style={{ '--scripture-size': `${fontSize}px`, '--previous-height': `${previousHeight}px` } as React.CSSProperties}>
-            {focusWriting && position.verse === 0 && <div className="previous-placeholder" aria-hidden="true" />}
+            {position.verse === 0 && <div className="previous-placeholder" aria-hidden="true" />}
             {visibleVerses.map((verse) => {
               const isActive = verse.number === currentVerse.number
               return (

@@ -21,7 +21,8 @@ try {
  }
  await page.click('.writing-tools button:nth-of-type(1)')
  await page.waitForFunction(()=>getComputedStyle(document.querySelector('.chapter-label')).opacity==='0')
- assert.equal(await page.$eval('.chapter-label',e=>getComputedStyle(e).display),'block')
+ assert.equal(await page.$eval('.chapter-label',e=>getComputedStyle(e).display),'none')
+ assert.equal(await page.$eval('.writing-reference',e=>getComputedStyle(e).display),'block')
  await page.click('.writing-tools button:nth-of-type(2)');await page.click('.verse.active p')
  assert.equal(await page.$eval('.verse.active p',e=>e.textContent),texts.BSB)
  assert.equal(await page.$eval('.verse.active p',e=>getComputedStyle(e).backgroundImage),'none')
