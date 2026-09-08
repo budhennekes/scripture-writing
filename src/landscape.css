@@ -1,4 +1,10 @@
 /* Landscape is a threshold, not a backdrop behind Scripture. */
+.writing-tools .writing-reference {pointer-events:auto;max-width:calc(100% - 44px);}
+.writing-tools .reference-picker {display:flex;align-items:center;gap:8px;padding:0;min-height:44px;font:inherit;color:var(--muted);text-align:left;background:transparent;max-width:100%;white-space:normal;}
+.writing-tools .reference-picker:hover {color:var(--ink);}
+.reference-picker svg {width:16px;height:16px;flex-shrink:0;}
+.navigator-translation {display:grid;gap:8px;margin-bottom:20px;font-size:14px;color:var(--muted);}
+.navigator-translation select {width:100%;}
 :root {--ink:#243345;--muted:#626d7c;--faint:#747d89;--accent:#526b8c;--accent-soft:rgb(82 107 140 / 8%);--line:rgb(36 51 69 / 14%);--page-deep:#edf0f4;}
 :root[data-theme='gray'] {--page:#edf0f4;--page-deep:#e1e6ec;}
 :root[data-theme='sage'] {--page:#edf1ed;--page-deep:#dfe7e2;--accent:#516e64;}

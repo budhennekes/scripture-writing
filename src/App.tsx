@@ -510,7 +510,7 @@ function App() {
           <select name="translation" inert={focusWriting} aria-label="Bible translation" value={translation} onChange={event => { setPanel(null); setTranslation(event.target.value) }}>
             <option value="WEB">WEB</option><option value="ASV1901">ASV 1901</option><option value="BSB">BSB</option>
           </select>
-          <span className="writing-reference">{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation}</span>
+          <span className="writing-reference"><button className="reference-picker" type="button" onClick={openNavigator} aria-haspopup="dialog" aria-label="Choose passage or translation">{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation}<ChevronDownIcon /></button></span>
           <button type="button" className="writing-mode-button" aria-pressed={focusWriting} onClick={focusWriting ? exitWriting : enterWriting}>{focusWriting ? 'Exit writing mode' : 'Enter writing mode'}</button>
           <button className="line-guide-button" type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button>
           {positionNotice && <span role="status">{positionNotice}</span>}
@@ -577,6 +577,13 @@ function App() {
                 <button type="button" className="close-button" onClick={() => setPanel(null)} aria-label="Close passage navigator">×</button>
               </div>
 
+              <label className="navigator-translation">Bible translation
+                <select name="navigator-translation" value={translation} onChange={event => { setPanel(null); setTranslation(event.target.value) }}>
+                  <option value="WEB">World English Bible</option>
+                  <option value="BSB">Berean Standard Bible</option>
+                  <option value="ASV1901">American Standard Version (1901)</option>
+                </select>
+              </label>
               <div className="reference-search">
                 <SearchIcon />
                 <input ref={searchInputRef} name="reference" value={referenceQuery} onChange={(event) => setReferenceQuery(event.target.value)} onKeyDown={(event) => {
