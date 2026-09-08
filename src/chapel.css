@@ -1,0 +1,109 @@
+/* Chapel: architecture surrounds the page; Scripture owns the page. */
+:root {--ink:#243038;--muted:#637078;--accent:#456572;--line:rgb(36 48 56 / 13%);--accent-soft:rgb(69 101 114 / 7%);}
+:root[data-theme='night'] {--page:#202a30;--page-deep:#28353d;--ink:#f0f2f1;--muted:#adbdc5;--accent:#adc9ce;--line:rgb(173 201 206 / 18%);--accent-soft:rgb(173 201 206 / 8%);}
+.app-shell,.app-shell.focus-writing {position:fixed;inset:116px 240px 36px 48px;width:auto;height:auto;min-height:0;grid-template-columns:128px minmax(0,1fr);background:var(--page);border-radius:6px;box-shadow:0 12px 60px rgb(9 22 30 / 14%);}
+.app-shell.controls-right {grid-template-columns:minmax(0,1fr) 128px;}
+.app-shell::before {content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--page);opacity:0;transition:opacity 320ms ease;}
+.app-shell.focus-writing::before {opacity:1;}
+.app-shell.focus-writing {box-shadow:none;}
+.landscape-scene {inset:0;height:100dvh;z-index:-2;}
+.landscape-scene img {object-fit:cover;object-position:center;width:100%;height:100%;}
+.landscape-scene::after {background:linear-gradient(90deg,rgb(14 27 36 / 25%),transparent 65%);}
+.room-identity {position:fixed;left:48px;top:30px;color:#fff;pointer-events:none;transition:opacity 180ms ease;}
+.room-identity p {margin:0 0 4px;font-family:'Newsreader Variable',Georgia,serif;font-size:34px;font-weight:400;letter-spacing:-.04em;}
+.room-identity p span {color:#d5dcd7;}
+.room-identity>span {font-size:12px;letter-spacing:.04em;}
+.focus-writing .room-identity {opacity:0;visibility:hidden;}
+.app-shell .reader-panel,:root[data-theme='night'] .reader-panel {height:100%;min-height:0;background:var(--page);grid-template-rows:88px minmax(0,1fr) 60px;border-radius:0 6px 6px 0;}
+.controls-right .reader-panel {border-radius:6px 0 0 6px;}
+.control-rail,.controls-right .control-rail,.focus-writing .control-rail {background:var(--page);border-radius:6px;padding:0 20px;gap:28px;}
+.control-rail {border-radius:6px 0 0 6px;}
+.controls-right .control-rail {border-radius:0 6px 6px 0;}
+.previous-button {height:56px;font-size:12px;}
+.next-button {height:min(42dvh,380px);font-size:13px;gap:12px;color:var(--ink);}
+.rail-button:not(:disabled):hover {background:var(--accent-soft);}
+.rail-button:disabled {opacity:.28;}
+.writing-tools {padding:0 76px 0 32px;gap:12px;border-bottom:1px solid var(--line);}
+.writing-tools .writing-reference,.focus-writing .writing-tools .writing-reference {font-family:inherit;font-size:14px;font-style:normal;letter-spacing:0;}
+.writing-tools .reference-picker,.writing-tools .reference-picker:hover,.writing-tools .setup-button {color:var(--ink);}
+.writing-tools .reference-picker {gap:6px;}
+.writing-tools .writing-mode-button {font-family:inherit;font-size:12px;padding:10px 14px;min-height:40px;min-width:0;background:var(--ink);color:var(--page);border-radius:5px;box-shadow:none;}
+.writing-tools .setup-button {padding:8px;min-height:44px;}
+.focus-writing .writing-tools {border-color:transparent;}
+.focus-writing .writing-tools .writing-mode-button {border:1px solid var(--line);}
+.page-ribbon {right:12px;width:40px;height:64px;color:var(--accent);}
+.page-ribbon::before {background:var(--accent-soft);}
+.page-ribbon.selected::before,.focus-writing .page-ribbon.selected::before {background:var(--accent);}
+.page-ribbon.selected {color:var(--page);}
+.scripture-wrap {padding:54px 64px 36px;}
+.scripture {line-height:1.55;letter-spacing:-.02em;}
+.verse {grid-template-columns:24px minmax(0,1fr);gap:18px;}
+.verse p {max-width:32ch;}
+.verse.active {padding:24px 0 48px;}
+.verse.active sup {color:var(--accent);font-size:15px;}
+.reader-footer {padding:0 32px;}
+.chapter-position {left:32px;right:32px;font-size:11px;}
+.chapter-position-line {background:var(--line);}
+.dialog-backdrop {background:rgb(19 32 42 / 28%);backdrop-filter:blur(5px);padding:24px;}
+.settings-dialog {width:min(100%,540px);border-radius:10px;padding:32px;box-shadow:0 20px 90px rgb(10 23 31 / 20%);border:1px solid var(--line);animation:chapel-dialog 220ms cubic-bezier(.2,.7,.2,1);}
+.dialog-heading {padding-bottom:24px;gap:20px;}
+.dialog-heading h1 {font-size:34px;font-weight:400;letter-spacing:-.035em;}
+.eyebrow {font-size:11px;margin-bottom:8px;color:var(--muted);}
+.close-button {background:transparent;border:1px solid var(--line);border-radius:50%;width:36px;height:36px;font-size:22px;color:var(--muted);}
+.settings-group {padding:22px 0;border-bottom:1px solid var(--line);}
+.setting-copy h2 {font-size:14px;font-weight:500;}
+.setting-copy p {font-size:12px;line-height:1.5;max-width:28ch;}
+.segmented-control,.font-control {border:1px solid var(--line);background:transparent;padding:3px;border-radius:6px;}
+.segmented-control button.selected {background:var(--accent-soft);color:var(--ink);}
+.background-options {gap:6px;border:0;padding:0;background:none;}
+.background-options button {display:flex;align-items:center;justify-content:flex-start;gap:7px;border:1px solid var(--line);border-radius:5px;padding:8px;font-size:11px;}
+.background-options button::before {content:'';width:14px;height:14px;border-radius:50%;border:1px solid rgb(80 90 100 / 20%);background:white;flex-shrink:0;}
+.background-options button:nth-child(2)::before {background:#edf0f4;}
+.background-options button:nth-child(3)::before {background:#edf1ed;}
+.background-options button:nth-child(4)::before {background:#202a30;}
+.background-options button.selected {border-color:var(--accent);}
+.reference-search {border:1px solid var(--line);background:transparent;border-radius:6px;min-height:54px;}
+.reference-search input {font-size:15px;}
+.navigator-translation {font-size:12px;gap:7px;}
+.navigator-translation select,.passage-selectors select {border-radius:5px;min-height:44px;font-size:14px;}
+.primary-button {border-radius:5px;font-size:13px;}
+.saved-places-heading h2 {font-family:'Newsreader Variable',Georgia,serif;font-size:23px;font-weight:400;}
+.saved-places-heading p,.empty-saved-places {font-size:12px;color:var(--muted);}
+.dialog-note {background:transparent;border-left:2px solid var(--line);border-radius:0;padding:4px 0 4px 14px;margin:22px 0;font-size:12px;}
+.copyright-note {font-size:10px;line-height:1.6;}
+@keyframes chapel-dialog {from {opacity:0;transform:translateY(8px)} to {opacity:1;transform:translateY(0)}}
+:root[data-theme='night'] .app-shell,:root[data-theme='night'] .settings-dialog {box-shadow:none;}
+@media(min-width:1700px) {.app-shell,.app-shell.focus-writing {right:22vw;left:6vw;}.room-identity {left:6vw;}}
+@media(max-width:1200px) {.app-shell,.app-shell.focus-writing {inset:106px 112px 24px 24px;grid-template-columns:108px minmax(0,1fr);}.app-shell.controls-right {grid-template-columns:minmax(0,1fr) 108px;}.room-identity {left:24px;top:24px;}.scripture-wrap {padding:44px 36px;}.writing-tools {padding-left:24px;padding-right:62px;gap:8px;}.writing-tools .writing-reference {font-size:13px;}.control-rail,.controls-right .control-rail {padding:0 12px;}}
+@media(max-width:800px) {
+ .app-shell,.app-shell.focus-writing {inset:148px 12px 12px;grid-template-columns:64px minmax(0,1fr);}
+ .app-shell.controls-right {grid-template-columns:minmax(0,1fr) 64px;}
+ .landscape-scene {height:190px;}
+ .landscape-scene img {object-position:100% 48%;}
+ .landscape-scene::after {background:linear-gradient(90deg,rgb(14 27 36 / 40%),transparent);}
+ .room-identity {left:24px;top:38px;}
+ .room-identity p {font-size:29px;}
+ .room-identity>span {font-size:11px;}
+ .app-shell .reader-panel {grid-template-rows:98px minmax(0,1fr) 48px;}
+ .writing-tools {padding:8px 12px;gap:4px 8px;flex-wrap:wrap;align-content:center;}
+ .writing-tools .writing-reference,.focus-writing .writing-tools .writing-reference {flex-basis:100%;font-size:14px;padding-right:24px;}
+ .writing-tools .writing-mode-button {font-size:11px;min-height:36px;padding:7px 10px;}
+ .writing-tools .setup-button {height:36px;min-height:36px;}
+ .page-ribbon {right:4px;width:36px;height:50px;}
+ .control-rail,.controls-right .control-rail {padding:0 6px;gap:26px;}
+ .next-button {height:min(40dvh,320px);font-size:12px;}
+ .previous-button {height:48px;font-size:11px;}
+ .scripture-wrap {padding:22px 20px;}
+ .scripture {line-height:1.42;}
+ .verse {grid-template-columns:1fr;gap:8px;}
+ .verse.active {padding-top:14px;}
+ .chapter-position {left:16px;right:16px;font-size:10px;}
+ .dialog-backdrop {padding:12px;align-items:center;}
+ .settings-dialog {padding:24px 20px;max-height:calc(100dvh - 24px);border-radius:10px;}
+ .dialog-heading h1 {font-size:30px;}
+ .setting-copy p,.dialog-note,.navigator-translation {font-size:14px;}
+ .navigator-translation select,.passage-selectors select,.reference-search input {font-size:16px;}
+ .background-options button {font-size:12px;}
+}
+@media(max-height:580px) {.app-shell,.app-shell.focus-writing {inset:16px 20px;}.room-identity {display:none;}.app-shell .reader-panel {grid-template-rows:72px minmax(0,1fr) 44px;}.scripture-wrap {padding-top:8px;}.control-rail,.controls-right .control-rail {gap:12px;}.next-button {height:40dvh;}}
+@media(prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none!important;transition:none!important;}}

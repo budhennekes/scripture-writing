@@ -4,6 +4,7 @@ import './redesign.css'
 import './writing-page.css'
 import './landscape.css'
 import './handwriting.css'
+import './chapel.css'
 
 type Verse = { number: number; text: string }
 type Chapter = { number: number; verses: Verse[] }
@@ -258,9 +259,17 @@ function App() {
     activeVerseRef.current?.scrollIntoView({ behavior: 'instant', block: 'nearest' })
   }, [position])
 
+  const restoreReaderFocus = useCallback(() => activeVerseRef.current?.focus({ preventScroll: true }), [])
+
   useEffect(() => {
-    if (panel === 'navigate') window.setTimeout(() => searchInputRef.current?.focus(), 80)
-  }, [panel])
+    if (panel) {
+      const timer = window.setTimeout(() => {
+        if (panel === 'navigate') searchInputRef.current?.focus()
+        else document.querySelector<HTMLButtonElement>('[aria-label="Close settings"]')?.focus()
+      }, 80)
+      return () => { window.clearTimeout(timer); requestAnimationFrame(restoreReaderFocus) }
+    }
+  }, [panel, restoreReaderFocus])
 
   const ensureWakeLock = useCallback(async () => {
     try {
@@ -366,10 +375,17 @@ function App() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || event.repeat) return
+      if (event.ctrlKey || event.metaKey || event.altKey || (event.shiftKey && event.key !== 'Tab') || event.repeat) return
       if (event.key === 'Escape') {
         setPanel(null)
         if (!panel) exitWriting()
+        return
+      }
+      if (panel && event.key === 'Tab') {
+        const controls = Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"] button, [role="dialog"] input, [role="dialog"] select, [role="dialog"] a')).filter(e => !e.hasAttribute('disabled') && e.offsetParent !== null)
+        const first = controls[0], last = controls.at(-1)
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
         return
       }
       const target = event.target as HTMLElement
@@ -454,8 +470,9 @@ function App() {
         activeVerseRef.current?.focus({ preventScroll: true })
       }
     }} className={`app-shell ${controlsOnLeft ? 'controls-left' : 'controls-right'} ${focusWriting ? 'focus-writing' : ''}`}>
-      <div className="landscape-scene" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}images/painted-cove.webp`} alt="" width="1915" height="821" /></div>
-      <aside className="control-rail" aria-label="Writing controls">
+      <div className="landscape-scene" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}images/chapel-light.webp`} alt="" width="1672" height="941" /></div>
+      <div className="room-identity" aria-hidden={focusWriting}><p>The writing room<span>.</span></p><span>Scripture, by hand.</span></div>
+      <aside className="control-rail" inert={Boolean(panel)} aria-label="Writing controls">
         <button ref={previousButtonRef} type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label="Previous verse">
           <ArrowUpIcon />
           <span>Back</span>
@@ -466,7 +483,7 @@ function App() {
         </button>
       </aside>
 
-      <section className="reader-panel">
+      <section className="reader-panel" inert={Boolean(panel)}>
         <button ref={bookmarkButtonRef} type="button" className={`icon-button bookmark-button page-ribbon ${currentBookmark && !saveError ? 'selected' : ''}`} onClick={toggleBookmark} aria-label={currentBookmark ? 'Remove bookmark' : 'Save this verse'}>
           <BookmarkIcon filled={Boolean(currentBookmark && !saveError)} />
         </button>

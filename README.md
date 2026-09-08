@@ -21,7 +21,7 @@ All bundled editions contain the 66-book Protestant canon. They do not include D
 
 ## Visual setting
 
-The reader shows one verse and one compact row: passage/translation chooser, writing mode, and settings. Duplicate selectors and surrounding verses are removed. Next has a large free-hand target with Back separated above it; writing-hand preference mirrors the controls. Line guide is in settings. The normal reader uses an original painted Mediterranean cove above an opaque Scripture surface. Focus fades out the landscape without moving the text. Background choices use cool mineral tones; Night uses midnight blue. All motion respects reduced-motion settings. The image is bundled locally and cached for offline use.
+The reader shows one verse and one compact row: passage/translation chooser, writing mode, and settings. Duplicate selectors and surrounding verses are removed. Next has a large free-hand target with Back separated above it; writing-hand preference mirrors the controls. Line guide is in settings. The reader is a bounded writing sheet within original Christian chapel imagery. A cross belongs to the architecture rather than UI decoration. The passage picker and settings share the same visual system; dialogs trap keyboard focus and return it to Scripture on dismissal. Focus fades out the landscape without moving the text. Background choices use cool mineral tones; Night uses midnight blue. All motion respects reduced-motion settings. The image is bundled locally and cached for offline use.
 
 ## Current acceptance gate
 
