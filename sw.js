@@ -1,5 +1,5 @@
 const PREFIX = 'scripture-scribe-'
-const CACHE_NAME = PREFIX + 'v9-library'
+const CACHE_NAME = PREFIX + 'v10-phone'
 const root = self.registration.scope
 const APP_SHELL = ['./', 'manifest.webmanifest', 'scribe-mark.svg', 'images/chapel-light.webp', 'data/bible.json', 'data/asv1901.json', 'data/bsb.json', 'data/dra.json', 'data/import-example.json'].map(path => new URL(path, root).href)
 self.addEventListener('install', event => {
