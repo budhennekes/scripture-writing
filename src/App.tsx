@@ -7,6 +7,7 @@ import './handwriting.css'
 import './chapel.css'
 import './book-browser.css'
 import './phone.css'
+import './polish.css'
 import { importInfo, readImport, storeImport } from './local-bible'
 
 type Verse = { number: number; text: string }
@@ -539,7 +540,7 @@ function App() {
           <BookmarkIcon filled={Boolean(currentBookmark && !saveError)} />
         </button>
         <div className="writing-tools">
-          <span className="writing-reference"><button className="reference-picker" type="button" onClick={openNavigator} aria-haspopup="dialog" aria-label="Choose passage or translation">{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation.startsWith('LOCAL_') ? 'Local' : translation}{randomReturn ? ' · Random' : ''}<ChevronDownIcon /></button></span>
+          <span className="writing-reference"><button className="reference-picker" type="button" onClick={openNavigator} aria-haspopup="dialog" aria-label="Choose passage or translation"><span className="picker-copy"><span>{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation.startsWith('LOCAL_') ? 'Local' : translation}{randomReturn ? ' · Random' : ''}</span><span className="picker-label">Choose a passage</span></span><ChevronDownIcon /></button></span>
           {!focusWriting && <button type="button" className="reader-random" onClick={randomVerse}>Random verse</button>}
           <button type="button" className="writing-mode-button" aria-pressed={focusWriting} onClick={focusWriting ? exitWriting : enterWriting}>{focusWriting ? 'Exit writing mode' : 'Enter writing mode'}</button>
           <button type="button" className="icon-button setup-button" onClick={() => setPanel('settings')} aria-label="Open settings"><SettingsIcon /></button>
@@ -607,12 +608,13 @@ function App() {
               <div className="dialog-heading">
                 <div>
                   <p className="eyebrow">Find your place</p>
-                  <h1 id="navigator-title">Go to a passage.</h1>
+                  <h1 id="navigator-title">Choose a passage.</h1>
                 </div>
                 <button type="button" className="close-button" onClick={() => setPanel(null)} aria-label="Close passage navigator">×</button>
               </div>
 
               <button type="button" className="continue-place" onClick={() => goTo(homePosition)}>Continue at {getReference(bible, homePosition)}<span>Your saved place →</span></button>
+              <div className="navigator-utilities">
               <label className="navigator-translation">Bible translation
                 <select name="navigator-translation" value={translation} onChange={event => { setPanel(null); setTranslation(event.target.value) }}>
                   {personalBible && <option value={personalBible.id}>{personalBible.name} · Personal import</option>}
@@ -622,10 +624,6 @@ function App() {
                   <option value="ASV1901">American Standard Version (1901)</option>
                 </select>
               </label>
-              {translation === 'DRA' && <p className="random-note">Catholic edition · Traditional English. Psalm and verse numbering can differ from other editions.</p>}
-              <button type="button" className="restore-hint random-verse" onClick={randomVerse}>Write a random verse</button>
-              {randomReturn ? <button type="button" className="restore-hint return-place" onClick={() => goTo(randomReturn)}>Return to saved place · {getReference(bible, randomReturn)}</button> : null}
-              <p className="random-note">Random verses won’t replace your saved place. Reloading returns you to it.</p>
               <div className="reference-search">
                 <SearchIcon />
                 <input ref={searchInputRef} name="reference" value={referenceQuery} onChange={(event) => setReferenceQuery(event.target.value)} onKeyDown={(event) => {
@@ -634,6 +632,8 @@ function App() {
                 {referenceQuery && <button type="button" onClick={() => setReferenceQuery('')} aria-label="Clear reference">×</button>}
               </div>
 
+              </div>
+              {translation === 'DRA' && <p className="edition-note">Catholic edition · Traditional English and Psalm numbering.</p>}
               {referenceQuery && (
                 <div className="reference-result" aria-live="polite">
                   {parsedReference ? (
@@ -650,6 +650,11 @@ function App() {
                 <h2 id="starting-title">Not sure where to begin?</h2>
                 <div>{[{ ref: translation === 'DRA' ? 'Psalms 22:1' : 'Psalms 23:1', label: translation === 'DRA' ? 'Psalm 22' : 'Psalm 23', note: 'Trust and care' }, { ref: 'John 1:1', label: 'John 1', note: 'An introduction to Jesus' }, { ref: 'Matthew 5:1', label: 'Matthew 5', note: 'The Sermon on the Mount' }].filter(item => resolveReference(item.ref, bible)).map(item => <button type="button" key={item.ref} onClick={() => { const target = resolveReference(item.ref, bible); if (target) goTo(target) }}><strong>{item.label}</strong><span>{item.note}</span></button>)}</div>
               </section>
+              <div className="discovery-alternative">
+              <button type="button" className="restore-hint random-verse" onClick={randomVerse}>Write a random verse</button>
+              {randomReturn ? <button type="button" className="restore-hint return-place" onClick={() => goTo(randomReturn)}>Return to saved place · {getReference(bible, randomReturn)}</button> : null}
+              <p className="random-note">Your saved place stays put.</p>
+              </div>
               <section className="book-browser" aria-labelledby="books-title">
                 <h2 id="books-title">Browse the books</h2>
                 <div className="testament-tabs" role="group" aria-label="Testament">

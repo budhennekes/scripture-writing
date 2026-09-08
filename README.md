@@ -35,6 +35,10 @@ Desktop and tablet remain the primary experience. Phones use a full-width reader
 
 Run `node scripts/phone_qa.mjs` for Chromium touch/viewport checks at phone portrait/landscape, tablet and desktop sizes. These are automated device-size simulations, not physical iPhone/Safari certification.
 
+## Navigation polish
+
+The reference control visibly says **Choose a passage** outside writing mode. The chooser groups translation and search, puts starting passages near the top, and reveals books earlier. Desktop Next has a quiet visible boundary; the dismissible keyboard hint sits above the reading sheet rather than covering the position label. This refinement does not change Scripture data or persistence formats. `node scripts/polish_qa.mjs` checks these UI requirements.
+
 ## Visual setting
 
 The reader defaults to one verse, with an optional two-verse view in Settings. A or Left Arrow goes back; D, Space, or Right Arrow advances past the displayed verses. A dismissible keyboard hint and verse-count preference save locally. The reader uses one compact row: passage/translation chooser, writing mode, and settings. Duplicate selectors and surrounding verses are removed. Next has a large free-hand target with Back separated above it; writing-hand preference mirrors the controls. Line guide is in settings. The reader is a bounded writing sheet within original Christian chapel imagery. A cross belongs to the architecture rather than UI decoration. The passage picker and settings share the same visual system; dialogs trap keyboard focus and return it to Scripture on dismissal. Focus fades out the landscape without moving the text. Background choices use cool mineral tones; Night uses midnight blue. All motion respects reduced-motion settings. The image is bundled locally and cached for offline use.
