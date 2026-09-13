@@ -1,8 +1,8 @@
-@import '@fontsource-variable/inter';
+@import '@fontsource-variable/source-sans-3';
 @import '@fontsource-variable/newsreader';
 
 :root {
-  font-family: 'Inter Variable', Inter, system-ui, sans-serif;
+  font-family: 'Source Sans 3 Variable', 'Segoe UI', sans-serif;
   color: #27251f;
   background: #f2ede2;
   font-synthesis: none;
@@ -345,7 +345,7 @@ svg {
 .verse sup {
   padding-top: 0.46em;
   color: currentColor;
-  font-family: 'Inter Variable', Inter, sans-serif;
+  font-family: 'Source Sans 3 Variable', 'Segoe UI', sans-serif;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   line-height: 1;

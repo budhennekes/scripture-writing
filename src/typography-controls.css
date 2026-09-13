@@ -1,0 +1,86 @@
+/* Book typography for Scripture; a humanist sans for using the companion. */
+:root {--ui-font:'Source Sans 3 Variable','Segoe UI',sans-serif;--control-radius:8px;--control-border:color-mix(in srgb,var(--ink) 25%,var(--page));}
+body,button,input,select,textarea {font-family:var(--ui-font);}
+button,input,select {font-size:16px;}
+button {font-weight:600;letter-spacing:0;}
+.settings-dialog {font-family:var(--ui-font);}
+.settings-dialog .dialog-heading h1,.welcome-dialog #welcome-title {font-family:'Newsreader Variable',Georgia,serif;font-size:40px;font-weight:500;line-height:1.08;letter-spacing:-.025em;text-wrap:balance;}
+.settings-dialog .dialog-heading {margin-bottom:24px;}
+.settings-dialog p {font-size:16px;line-height:1.5;}
+.settings-dialog .setting-copy h2 {font-family:var(--ui-font);font-size:17px;font-weight:600;line-height:1.25;letter-spacing:0;}
+.settings-dialog .setting-copy p {font-size:15px;line-height:1.4;}
+.settings-dialog .setting-copy {max-width:unset;}
+.settings-dialog .setting-copy p {max-width:28ch;}
+.settings-dialog .dialog-note,.settings-dialog .copyright-note,.welcome-dialog .welcome-privacy {font-size:14px;line-height:1.5;}
+.welcome-dialog .welcome-copy {font-size:18px;line-height:1.5;max-width:40ch;margin:0 0 24px;}
+.welcome-dialog .welcome-skip {font-size:16px;font-weight:600;}
+.desk-page span,.desk-control {font-size:13px;}
+.settings-dialog .starting-points h2,.settings-dialog .book-browser h2,.settings-dialog .saved-places-heading h2 {font-family:'Newsreader Variable',Georgia,serif;font-size:28px;font-weight:500;line-height:1.15;letter-spacing:-.015em;}
+.starting-points strong,.book-cover strong {font-weight:500;font-size:25px;line-height:1.12;}
+.starting-points span {font-size:14px;line-height:1.4;}
+.book-cover span,.book-group h3>span {font-size:13px;line-height:1.35;}
+.book-group h3 {font-size:15px;}
+.settings-dialog .chapter-browser p {font-size:14px;}
+.navigator-translation,.passage-selectors label,.navigator-dialog .navigator-translation {font-size:14px;font-weight:600;}
+.settings-dialog input,.settings-dialog select {font-size:16px;min-height:48px;border-color:var(--control-border);border-radius:var(--control-radius);}
+.settings-dialog .reference-search {min-height:48px;border-color:var(--control-border);border-radius:var(--control-radius);}
+.settings-dialog .reference-search input {min-height:46px;}
+.navigator-dialog .continue-place {font-size:16px;font-weight:600;}
+.navigator-dialog .continue-place span,.settings-dialog .random-note {font-size:14px;font-weight:400;}
+.discovery-alternative .random-verse {font-size:16px;font-weight:600;}
+.chapter-position p {font-size:13px;line-height:1.3;}
+.shortcut-coach p,.shortcut-coach div {font-size:14px;line-height:1.4;}
+.room-identity p {font-weight:500;letter-spacing:-.03em;}
+.testament-tabs button {font-size:16px;}
+.restore-hint,.specific-passage summary,.personal-import summary {font-size:16px;font-weight:600;}
+/* One unmistakable primary action, quieter but tangible secondary actions. */
+.app-shell .control-rail .next-button {background:var(--accent);color:var(--page);border:1px solid var(--accent);border-radius:var(--control-radius);box-shadow:0 3px 8px rgb(10 23 31 / 12%);font:600 19px/1.2 var(--ui-font);gap:20px;}
+.app-shell .control-rail .previous-button {border:1px solid var(--control-border);border-radius:var(--control-radius);background:var(--page);color:var(--ink);font:600 16px/1.2 var(--ui-font);}
+.app-shell .control-rail .rail-button:disabled {opacity:.42;box-shadow:none;cursor:default;}
+.primary-button,.writing-tools .writing-mode-button:not([aria-pressed=true]) {border-radius:var(--control-radius);font-size:16px;font-weight:600;min-height:48px;padding:12px 20px;}
+.app-shell .writing-tools .writing-mode-button {font-family:var(--ui-font);font-size:15px;font-weight:600;min-height:44px;padding:10px 16px;letter-spacing:0;border-radius:var(--control-radius);}
+.focus-writing .writing-tools .writing-mode-button {background:var(--page);color:var(--ink);border:1px solid var(--control-border);}
+.app-shell .writing-tools .setup-button {width:44px;height:44px;min-width:44px;border:1px solid var(--control-border);border-radius:var(--control-radius);color:var(--ink);background:var(--page);}
+.app-shell .reader-random {font-family:var(--ui-font);font-size:15px;font-weight:600;min-height:44px;padding:8px;color:var(--accent);}
+.app-shell .reference-picker .picker-copy>span:first-child {font-family:var(--ui-font);font-size:16px;font-weight:600;line-height:1.2;letter-spacing:0;}
+.app-shell .reference-picker .picker-label {font-size:14px;font-weight:400;line-height:1.2;color:var(--muted);}
+.segmented-control {border-color:var(--control-border);border-radius:var(--control-radius);}
+.segmented-control button {min-height:44px;min-width:60px;font-size:16px;font-weight:500;border-radius:5px;}
+.segmented-control button[aria-pressed=true] {font-weight:650;}
+.settings-dialog .font-control {border-color:var(--control-border);border-radius:var(--control-radius);}
+.settings-dialog .font-control button {font:600 22px/1 var(--ui-font);min-height:44px;min-width:48px;color:var(--ink);}
+.settings-dialog .font-control strong {font:600 16px/1 var(--ui-font);font-variant-numeric:tabular-nums;}
+.settings-dialog .line-guide-button {font-size:16px;font-weight:600;min-height:44px;border-radius:var(--control-radius);}
+.hand-choice::before,.verse-choice::before {border-radius:5px;}
+.chapter-grid button {min-height:48px;font:600 16px/1 var(--ui-font);border-color:var(--control-border);border-radius:6px;}
+.close-button {border-color:var(--control-border);color:var(--ink);}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible {outline:2px solid var(--accent);outline-offset:3px;}
+.primary-button,.writing-mode-button,.setup-button,.chapter-grid button,.segmented-control button {transition:background-color 120ms ease,color 120ms ease,border-color 120ms ease,transform 100ms ease;}
+@media(hover:hover) and (pointer:fine) {
+ .app-shell .control-rail .next-button:hover:not(:disabled) {background:color-mix(in srgb,var(--accent) 90%,var(--ink));}
+ .app-shell .control-rail .previous-button:hover:not(:disabled),.app-shell .writing-tools .setup-button:hover,.focus-writing .writing-tools .writing-mode-button:hover {background:var(--accent-soft);}
+ .writing-tools .writing-mode-button:hover {transform:none;}
+}
+@media(max-width:1000px) {
+ .app-shell .writing-tools .writing-mode-button {padding:8px 10px;font-size:14px;}
+ .app-shell .reader-random {font-size:14px;padding:6px;}
+ .app-shell .reference-picker .picker-copy>span:first-child {font-size:15px;}
+}
+@media(max-width:600px) {
+ .settings-dialog .dialog-heading h1,.welcome-dialog #welcome-title {font-size:36px;}
+ .welcome-dialog .welcome-copy {font-size:17px;}
+ .app-shell .writing-tools {padding-right:44px;column-gap:6px;}
+ .app-shell .writing-tools .writing-mode-button {font-size:14px;padding:8px 10px;}
+ .app-shell .reader-random {font-size:14px;padding:6px 2px;}
+ .app-shell .control-rail .next-button {font-size:18px;gap:12px;}
+ .starting-points strong,.book-cover strong {font-size:22px;}
+ .settings-dialog .settings-group {gap:16px;}
+ .book-cover {min-height:106px;}
+}
+@media(max-width:360px) {
+ .app-shell .writing-tools {padding-left:12px;padding-right:12px;column-gap:4px;}
+ .app-shell .writing-tools .writing-reference {padding-right:32px;}
+ .app-shell .writing-tools .writing-mode-button {padding:8px;font-size:13px;}
+ .app-shell .reader-random {font-size:13px;}
+}
+@media(prefers-reduced-motion:reduce) {button,input,select {transition:none!important;}}

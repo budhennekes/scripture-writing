@@ -13,7 +13,7 @@ Public MVP: https://budhennekes.github.io/scripture-writing/
 - Choose **Enter writing mode** for browser fullscreen, with a full-viewport fallback where unsupported. **Exit writing mode** and Escape return to the normal reader. The compact passage heading, page-edge bookmark ribbon, and chapter-position rule remain visible. Scripture stays still; arrows continue after toolbar actions, and pointer clicks return focus to the text so Space continues writing.
 - Turn on **Line guide**, then click a line or use up/down while the text is focused to move a fine margin marker. Navigation controls give brief keyboard feedback; Scripture stays still. Reduced-motion preferences are respected.
 - Adjust type size and choose **White**, **Soft gray**, **Pale sage**, or **Night** in settings. Background choices are saved locally; existing Paper settings become White.
-- Subtle, transparent Back/Next controls stay on your free-hand side. The thin bottom line shows chapter position, not completion; its reference stays visible in writing mode.
+- A filled Next button and outlined Back button stay on your free-hand side. The thin bottom line shows chapter position, not completion; its reference stays visible in writing mode.
 
 Your place and bookmarks are stored in this browser, separately for each translation. They do not sync between devices; clearing browser storage removes them. Moving from the local prototype to the public URL does not transfer local saves. Focus and line guide are session controls. Offline support is available after a successful online load and service-worker installation. Browser support for fullscreen and screen wake lock varies.
 
@@ -49,7 +49,11 @@ The reader defaults to one verse, with an optional two-verse view in Settings. A
 
 ## Current acceptance gate
 
-Run `npm run qa:release` against the production preview. This runs 15 active suites, including onboarding, ordinary writing, phone layouts, private imports, random-return protection, persisted settings, native fullscreen and its fallback, stable Scripture geometry, reduced motion, and dialog focus. The fullscreen, persistence, and writing-acceptance selectors now match the chapel interface. Other older browser/release/layout scripts remain historical, not release gates.
+Run `npm run qa:release` against the production preview. This runs 16 active suites, including typography/control contrast, onboarding, ordinary writing, phone layouts, private imports, random-return protection, persisted settings, native fullscreen and its fallback, stable Scripture geometry, reduced motion, and dialog focus. The fullscreen, persistence, and writing-acceptance selectors now match the chapel interface. Other older browser/release/layout scripts remain historical, not release gates.
+
+## Typography and controls
+
+Newsreader remains the Scripture and heading face. Source Sans 3 replaces Inter for controls and UI text; both are self-hosted. Headings use stronger weights, labels and helper text have clear roles, and primary actions use readable labels with a consistent control shape. Next retains its generous free-hand target. Scripture font size and its fixed writing anchor are unchanged. `scripts/typography_qa.mjs` checks font loading, toolbar non-overlap, option sizes, and Next contrast across all four themes. Source Sans 3's license is included in `public/fonts/source-sans-3-LICENSE.txt`.
 
 ## First visit and interaction details
 

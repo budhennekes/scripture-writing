@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import './redesign.css'
 import './writing-page.css'
@@ -9,6 +9,7 @@ import './book-browser.css'
 import './phone.css'
 import './polish.css'
 import './interactions.css'
+import './typography-controls.css'
 import { BookChapters } from './interactions'
 import { usePanelMotion } from './panel-motion'
 import { importInfo, readImport, storeImport } from './local-bible'
@@ -293,6 +294,9 @@ function App() {
 
   const restoreReaderFocus = useCallback(() => activeVerseRef.current?.focus({ preventScroll: true }), [])
 
+  // A closed dialog must not consume the writer's next key during its exit animation.
+  useLayoutEffect(() => { if (!panel && bible) restoreReaderFocus() }, [panel, bible, restoreReaderFocus])
+
   useEffect(() => {
     if (panel) {
       const timer = window.setTimeout(() => {
@@ -415,7 +419,7 @@ function App() {
     }
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.isComposing || event.ctrlKey || event.metaKey || event.altKey || (event.shiftKey && event.key !== 'Tab') || event.repeat) return
       if (event.key === 'Escape') {
