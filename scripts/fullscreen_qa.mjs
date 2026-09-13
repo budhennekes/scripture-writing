@@ -1,13 +1,14 @@
+import { returningUser } from './qa-user.mjs'
 import puppeteer from 'puppeteer-core'
 import assert from 'node:assert/strict'
 import {mkdir} from 'node:fs/promises'
 const browser=await puppeteer.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true})
 try {
- const page=await browser.newPage();await page.setViewport({width:1440,height:900})
+ const page=await browser.newPage();await returningUser(page);await page.setViewport({width:1440,height:900})
  const errors=[];page.on('pageerror',e=>errors.push(e.message))
- await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle0'})
+ await page.goto(process.env.QA_URL||'http://127.0.0.1:4173/',{waitUntil:'networkidle0'})
  await page.waitForSelector('.verse.active p')
- await page.click('.passage-button');await page.type('input[name="reference"]','John 3:16');await page.keyboard.press('Enter')
+ await page.click('.reference-picker');await page.type('input[name="reference"]','John 3:16');await page.keyboard.press('Enter')
  await page.waitForFunction(()=>document.querySelector('.verse.active sup').textContent==='16')
  const text=await page.$eval('.verse.active p',e=>e.textContent)
  await page.click('.page-ribbon');await page.waitForSelector('.page-ribbon.selected')
@@ -16,7 +17,7 @@ try {
  await page.click('.writing-mode-button')
  await page.waitForFunction(()=>!!document.fullscreenElement&&!!document.querySelector('.focus-writing'))
  assert.equal(await page.$eval('.verse.active p',e=>e.textContent),text)
- assert.ok(await page.$eval('.topbar',e=>e.inert&&getComputedStyle(e).visibility==='hidden'))
+ await page.waitForFunction(()=>getComputedStyle(document.querySelector('.room-identity')).visibility==='hidden');assert.equal(await page.$eval('.room-identity',e=>e.getAttribute('aria-hidden')),'true')
  await new Promise(r=>setTimeout(r,250));await page.screenshot({path:'qa/writing-page-focus.png'})
  await page.click('.writing-mode-button');await page.waitForFunction(()=>!document.fullscreenElement&&!document.querySelector('.focus-writing'))
  await page.click('.writing-mode-button');await page.waitForFunction(()=>!!document.fullscreenElement)
@@ -25,7 +26,10 @@ try {
  await page.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new Error('Unsupported'))})
  await page.click('.writing-mode-button');await page.waitForSelector('.focus-writing')
  assert.equal(await page.evaluate(()=>!!document.fullscreenElement),false)
- assert.ok(await page.$eval('.focus-writing',e=>{const r=e.getBoundingClientRect();return r.width===innerWidth&&r.height===innerHeight}))
+ // The chapel layout keeps Scripture anchored; its fixed backdrop covers the viewport.
+ await page.waitForFunction(()=>getComputedStyle(document.querySelector('.focus-writing'),'::before').opacity==='1')
+ assert.ok(await page.$eval('.focus-writing',e=>{const s=getComputedStyle(e,'::before');return s.position==='fixed'&&parseFloat(s.width)===innerWidth&&parseFloat(s.height)===innerHeight}))
+ assert.ok(await page.$eval('.writing-mode-button',e=>{const r=e.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight&&e.textContent==='Exit writing mode'}))
  await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('.focus-writing'))
  await page.reload({waitUntil:'networkidle0'});await page.waitForSelector('.page-ribbon.selected')
  assert.equal(await page.$eval('.verse.active p',e=>e.textContent),text)

@@ -8,6 +8,9 @@ import './chapel.css'
 import './book-browser.css'
 import './phone.css'
 import './polish.css'
+import './interactions.css'
+import { BookChapters } from './interactions'
+import { usePanelMotion } from './panel-motion'
 import { importInfo, readImport, storeImport } from './local-bible'
 
 type Verse = { number: number; text: string }
@@ -25,7 +28,7 @@ const BACKGROUNDS: { value: Theme; label: string }[] = [
   { value: 'paper', label: 'White' }, { value: 'gray', label: 'Soft gray' },
   { value: 'sage', label: 'Pale sage' }, { value: 'night', label: 'Night' },
 ]
-type Panel = 'navigate' | 'settings' | null
+
 
 type CanonicalPosition = { bookId: string; chapter: number; verse: number }
 type TranslationState = { position: CanonicalPosition; savedPlaces: { id: string; position: CanonicalPosition; savedAt: number }[] }
@@ -217,7 +220,8 @@ function App() {
   const [fontSize, setFontSize] = useState(saved.fontSize ?? 36)
   const [theme, setTheme] = useState<Theme>(BACKGROUNDS.some(option => option.value === saved.theme) ? saved.theme : 'paper')
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(saved.savedPlaces ?? [])
-  const [panel, setPanel] = useState<Panel>(null)
+  const { panel, shownPanel, setPanel } = usePanelMotion()
+  const [bookmarkMessage, setBookmarkMessage] = useState(false)
   const [browseTestament, setBrowseTestament] = useState(0)
   const [expandedBook, setExpandedBook] = useState<number | null>(null)
   const [referenceQuery, setReferenceQuery] = useState('')
@@ -265,6 +269,7 @@ function App() {
         ...(translation === 'WEB' ? { position: savedPosition, savedPlaces } : {}),
       }))
       setSaveError(false)
+      if (bookmarkPending.current) setBookmarkMessage(true)
       if (bookmarkPending.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         bookmarkButtonRef.current?.querySelector('svg')?.animate([
           { transform: 'translateY(-3px)' }, { transform: 'translateY(1px)', offset: 0.7 }, { transform: 'none' },
@@ -274,6 +279,7 @@ function App() {
     bookmarkPending.current = false
   }, [bible, translation, position, handedness, fontSize, theme, savedPlaces, saved, versesPerView, shortcutHintDismissed, randomReturn])
 
+  useEffect(() => { if (!bookmarkMessage) return; const timer = window.setTimeout(() => setBookmarkMessage(false), 1600); return () => clearTimeout(timer) }, [bookmarkMessage])
   useEffect(() => { setGuideTop(null) }, [position, fontSize, translation])
   useEffect(() => {
     const clear = () => setGuideTop(null)
@@ -294,11 +300,12 @@ function App() {
           if (window.matchMedia('(pointer: coarse) and (max-width: 1000px)').matches) document.querySelector<HTMLButtonElement>('[aria-label="Close passage navigator"]')?.focus()
           else searchInputRef.current?.focus()
         }
+        else if (panel === 'welcome') document.querySelector<HTMLButtonElement>('[aria-label="Skip introduction"]')?.focus()
         else document.querySelector<HTMLButtonElement>('[aria-label="Close settings"]')?.focus()
       }, 80)
       return () => { window.clearTimeout(timer); requestAnimationFrame(restoreReaderFocus) }
     }
-  }, [panel, restoreReaderFocus])
+  }, [panel, bible, restoreReaderFocus])
 
   const ensureWakeLock = useCallback(async () => {
     try {
@@ -356,7 +363,7 @@ function App() {
     setExpandedBook(null)
     setReferenceQuery('')
     setPanel('navigate')
-  }, [position, bible])
+  }, [position, bible, setPanel])
 
   const toggleBookmark = useCallback(() => {
     const existing = savedPlaces.find(place => samePosition(place.position, position))
@@ -417,9 +424,9 @@ function App() {
         return
       }
       if (panel && event.key === 'Tab') {
-        const controls = Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"] button, [role="dialog"] input, [role="dialog"] select, [role="dialog"] a, [role="dialog"] summary')).filter(e => !e.hasAttribute('disabled') && e.offsetParent !== null)
+        const controls = Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"] button, [role="dialog"] input, [role="dialog"] select, [role="dialog"] a, [role="dialog"] summary')).filter(e => !e.hasAttribute('disabled') && e.offsetParent !== null && !e.closest('[inert]'))
         const first = controls[0], last = controls.at(-1)
-        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
+        if (event.shiftKey && (document.activeElement === first || !controls.includes(document.activeElement as HTMLElement))) { event.preventDefault(); last?.focus() }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
         return
       }
@@ -448,7 +455,7 @@ function App() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [keyboardMove, openNavigator, panel, toggleBookmark, exitWriting])
+  }, [keyboardMove, openNavigator, panel, toggleBookmark, exitWriting, setPanel])
 
   if (loadError) {
     return (
@@ -538,6 +545,7 @@ function App() {
       <section className="reader-panel" inert={Boolean(panel)}>
         <button ref={bookmarkButtonRef} type="button" className={`icon-button bookmark-button page-ribbon ${currentBookmark && !saveError ? 'selected' : ''}`} onClick={toggleBookmark} aria-label={currentBookmark ? 'Remove bookmark' : 'Save this verse'}>
           <BookmarkIcon filled={Boolean(currentBookmark && !saveError)} />
+          {bookmarkMessage && currentBookmark && !saveError && <span className="bookmark-confirmation" aria-hidden="true">Saved</span>}
         </button>
         <div className="writing-tools">
           <span className="writing-reference"><button className="reference-picker" type="button" onClick={openNavigator} aria-haspopup="dialog" aria-label="Choose passage or translation"><span className="picker-copy"><span>{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation.startsWith('LOCAL_') ? 'Local' : translation}{randomReturn ? ' · Random' : ''}</span><span className="picker-label">Choose a passage</span></span><ChevronDownIcon /></button></span>
@@ -601,10 +609,21 @@ function App() {
         <p>Keep your writing hand on the page.</p>
         <div><kbd>{handedness === 'right' ? 'A' : '←'}</kbd> Back <kbd>{handedness === 'right' ? 'D' : '→'}</kbd> Next <span>Space works too.</span></div>
       </aside>}
-      {panel && (
-        <div className="dialog-backdrop" onMouseDown={() => setPanel(null)}>
-          {panel === 'navigate' ? (
-            <section className="settings-dialog navigator-dialog" role="dialog" aria-modal="true" aria-labelledby="navigator-title" onMouseDown={(event) => event.stopPropagation()}>
+      <span className="sr-only" role="status">{bookmarkMessage && currentBookmark && !saveError ? 'Bookmark saved' : ''}</span>
+      {shownPanel && (
+        <div key={shownPanel} className="dialog-backdrop" data-closing={!panel || undefined} inert={!panel} aria-hidden={!panel || undefined} onMouseDown={() => setPanel(null)}>
+          {shownPanel === 'welcome' ? (
+            <section className="settings-dialog welcome-dialog" role={panel ? 'dialog' : undefined} aria-modal={panel ? true : undefined} aria-labelledby="welcome-title" onMouseDown={event => event.stopPropagation()}>
+              <div className="dialog-heading"><h1 id="welcome-title" tabIndex={-1}>Scripture, in your own handwriting.</h1><button type="button" className="close-button" aria-label="Skip introduction" onClick={() => setPanel(null)}>×</button></div>
+              <p className="welcome-copy">Bring a notebook and a pen. Choose a passage, then use your free hand to move through it.</p>
+              <div className="welcome-desk" data-hand={handedness} aria-hidden="true"><span className="desk-control">Next →</span><span className="desk-page"><span>Notebook</span><i/><i/><i/></span></div>
+              <div className="settings-group"><div className="setting-copy"><h2>Which hand do you write with?</h2><p>We’ll put the controls on the other side.</p></div><div className="segmented-control hand-choice" data-selection={handedness === 'right' ? 0 : 1} role="group" aria-label="Writing hand"><button type="button" className={handedness === 'right' ? 'selected' : ''} aria-pressed={handedness === 'right'} onClick={() => setHandedness('right')}>Right</button><button type="button" className={handedness === 'left' ? 'selected' : ''} aria-pressed={handedness === 'left'} onClick={() => setHandedness('left')}>Left</button></div></div>
+              <button type="button" className="primary-button welcome-start" onClick={openNavigator}>Choose my first passage</button>
+              <button type="button" className="welcome-skip" onClick={() => setPanel(null)}>{getReference(bible, position) === 'Genesis 1:1' ? 'Start with Genesis' : `Continue at ${getReference(bible, position)}`}</button>
+              <p className="welcome-privacy">No account needed. Your place stays in this browser.</p>
+            </section>
+          ) : shownPanel === 'navigate' ? (
+            <section className="settings-dialog navigator-dialog" role={panel ? 'dialog' : undefined} aria-modal={panel ? true : undefined} aria-labelledby="navigator-title" onMouseDown={(event) => event.stopPropagation()}>
               <div className="dialog-heading">
                 <div>
                   <p className="eyebrow">Find your place</p>
@@ -657,7 +676,7 @@ function App() {
               </div>
               <section className="book-browser" aria-labelledby="books-title">
                 <h2 id="books-title">Browse the books</h2>
-                <div className="testament-tabs" role="group" aria-label="Testament">
+                <div className="testament-tabs" data-selection={browseTestament} role="group" aria-label="Testament">
                   {(['Old Testament', 'New Testament'] as const).map((label, index) => <button key={label} type="button" aria-pressed={browseTestament === index} onClick={() => { setBrowseTestament(index); setExpandedBook(null) }}>{label}</button>)}
                 </div>
                 {displayGroups.filter(group => group.testament === browseTestament && bible.books.some(book => group.ids.includes(book.id))).map(group => <section className="book-group" key={group.title}>
@@ -666,7 +685,7 @@ function App() {
                     <button type="button" className="book-cover" aria-expanded={expandedBook === index} aria-controls={`chapters-${item.id}`} onClick={() => setExpandedBook(expandedBook === index ? null : index)}>
                       <strong>{item.name}</strong><span>{item.chapters.length} {item.chapters.length === 1 ? 'chapter' : 'chapters'}{homePosition.book === index ? ' · Your place' : ''}</span>
                     </button>
-                    {expandedBook === index && <div className="chapter-browser" id={`chapters-${item.id}`}><p>Choose a chapter to start writing.</p><div className="chapter-grid">{item.chapters.map((ch, ci) => <button type="button" key={ch.number} aria-label={`${item.name} ${ch.number}${homePosition.book === index && homePosition.chapter === ci ? ' · Your place' : ''}`} aria-current={homePosition.book === index && homePosition.chapter === ci ? 'location' : undefined} onClick={() => goTo({book:index, chapter:ci, verse:0})}>{ch.number}</button>)}</div></div>}
+                    <BookChapters open={expandedBook === index} id={`chapters-${item.id}`}><p>Choose a chapter to start writing.</p><div className="chapter-grid">{item.chapters.map((ch, ci) => <button type="button" key={ch.number} aria-label={`${item.name} ${ch.number}${homePosition.book === index && homePosition.chapter === ci ? ' · Your place' : ''}`} aria-current={homePosition.book === index && homePosition.chapter === ci ? 'location' : undefined} onClick={() => goTo({book:index, chapter:ci, verse:0})}>{ch.number}</button>)}</div></BookChapters>
                   </div>)}</div>
                 </section>)}
               </section>
@@ -725,7 +744,7 @@ function App() {
               </section>
             </section>
           ) : (
-            <section className="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title" onMouseDown={(event) => event.stopPropagation()}>
+            <section className="settings-dialog" role={panel ? 'dialog' : undefined} aria-modal={panel ? true : undefined} aria-labelledby="settings-title" onMouseDown={(event) => event.stopPropagation()}>
               <div className="dialog-heading">
                 <div>
                   <p className="eyebrow">Writing setup</p>
@@ -739,9 +758,9 @@ function App() {
                   <h2>Writing hand</h2>
                   <p>The main control moves to your free hand.</p>
                 </div>
-                <div className="segmented-control" role="group" aria-label="Writing hand">
-                  <button type="button" className={handedness === 'right' ? 'selected' : ''} onClick={() => setHandedness('right')}>Right</button>
-                  <button type="button" className={handedness === 'left' ? 'selected' : ''} onClick={() => setHandedness('left')}>Left</button>
+                <div className="segmented-control hand-choice" data-selection={handedness === 'right' ? 0 : 1} role="group" aria-label="Writing hand">
+                  <button type="button" className={handedness === 'right' ? 'selected' : ''} aria-pressed={handedness === 'right'} onClick={() => setHandedness('right')}>Right</button>
+                  <button type="button" className={handedness === 'left' ? 'selected' : ''} aria-pressed={handedness === 'left'} onClick={() => setHandedness('left')}>Left</button>
                 </div>
               </div>
 
@@ -768,7 +787,7 @@ function App() {
               </div>
 
               <div className="settings-group"><div className="setting-copy"><h2>Line guide</h2><p>Mark the line you are copying.</p></div><button className="line-guide-button" type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button></div>
-              <div className="settings-group"><div className="setting-copy"><h2>Verses in view</h2><p>Next advances past the displayed verses.</p></div><div className="segmented-control" role="group" aria-label="Verses in view"><button type="button" className={versesPerView === 1 ? 'selected' : ''} aria-pressed={versesPerView === 1} onClick={() => setVersesPerView(1)}>One</button><button type="button" className={versesPerView === 2 ? 'selected' : ''} aria-pressed={versesPerView === 2} onClick={() => setVersesPerView(2)}>Two</button></div></div>
+              <div className="settings-group"><div className="setting-copy"><h2>Verses in view</h2><p>Next advances past the displayed verses.</p></div><div className="segmented-control verse-choice" data-selection={versesPerView - 1} role="group" aria-label="Verses in view"><button type="button" className={versesPerView === 1 ? 'selected' : ''} aria-pressed={versesPerView === 1} onClick={() => setVersesPerView(1)}>One</button><button type="button" className={versesPerView === 2 ? 'selected' : ''} aria-pressed={versesPerView === 2} onClick={() => setVersesPerView(2)}>Two</button></div></div>
               <div className="dialog-note">
                 <p>Designed for desktop and tablet, with a phone-friendly layout. On iPhone or another phone, prop it beside your notebook and use the bottom controls.</p>
                 <p><strong>Keyboard controls</strong></p>
@@ -776,6 +795,7 @@ function App() {
               </div>
               {shortcutHintDismissed && <button type="button" className="restore-hint" onClick={() => setShortcutHintDismissed(false)}>Show keyboard tip again</button>}
               <button type="button" className="primary-button" onClick={() => setPanel(null)}>Return to writing</button>
+              <button type="button" className="restore-hint" onClick={() => setPanel('welcome')}>Show introduction</button>
               <details className="personal-import"><summary>Import your own Bible text</summary>
                 <p>JSON only, up to 12 MB. Use text you have permission to use. Files stay in this browser; clearing browser data removes them. PDF and EPUB are not supported.</p>
                 <a href={`${import.meta.env.BASE_URL}data/import-example.json`} download>Download example format</a>

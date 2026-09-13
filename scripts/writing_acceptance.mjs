@@ -1,3 +1,4 @@
+import { returningUser } from './qa-user.mjs'
 import puppeteer from 'puppeteer-core'
 import assert from 'node:assert/strict'
 import {mkdir,writeFile} from 'node:fs/promises'
@@ -7,7 +8,7 @@ const results=[]
 try {
  for (const reduced of [false,true]) {
   const context=await browser.createBrowserContext()
-  const page=await context.newPage();const errors=[]
+  const page=await context.newPage();await returningUser(page);const errors=[]
   page.on('pageerror',e=>errors.push(e.message))
   await page.setViewport({width:1440,height:900})
   await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:reduced?'reduce':'no-preference'}])
@@ -15,7 +16,7 @@ try {
   await page.waitForSelector('.verse.active p')
   const clickText=async text=>{const found=await page.evaluate(text=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent.trim()===text);if(!b)return false;b.click();b.focus();return true},text);assert.ok(found,`Missing visible action: ${text}`)}
   const rect=()=>page.$eval('.verse.active p',p=>{const r=p.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,text:p.textContent}})
-  const reference=()=>page.$eval('.passage-button',p=>p.textContent)
+  const reference=()=>page.$eval('.reference-picker',p=>p.textContent)
   const before=await rect()
   await clickText('Enter writing mode')
   await page.waitForFunction(()=>[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='Exit writing mode'))
@@ -26,11 +27,11 @@ try {
   // The focus button remains keyboard-focused: arrows must still navigate.
   const initial=await reference()
   await page.keyboard.press('ArrowRight')
-  await page.waitForFunction(old=>document.querySelector('.passage-button')?.textContent!==old,{},initial)
+  await page.waitForFunction(old=>document.querySelector('.reference-picker')?.textContent!==old,{},initial)
   const advanced=await rect()
   assert.ok(Math.abs(advanced.y-after.y)<2,`Verse navigation moved the reading anchor: ${after.y} -> ${advanced.y}`)
   await page.keyboard.press('ArrowLeft')
-  await page.waitForFunction(old=>document.querySelector('.passage-button')?.textContent===old,{},initial)
+  await page.waitForFunction(old=>document.querySelector('.reference-picker')?.textContent===old,{},initial)
   await page.keyboard.down('Control');await page.keyboard.press('ArrowRight');await page.keyboard.up('Control')
   assert.equal(await reference(),initial,'Modified arrows changed Scripture')
   const still=await rect();await new Promise(r=>setTimeout(r,350));const settled=await rect()
@@ -39,7 +40,7 @@ try {
   await page.screenshot({path:`qa/writing-acceptance-${reduced?'reduced':'normal'}.png`})
   await clickText('Exit writing mode')
   await page.waitForFunction(()=>!document.querySelector('.focus-writing'))
-  await page.click('.passage-button');await page.waitForSelector('input[name="reference"]')
+  await page.click('.reference-picker');await page.waitForSelector('input[name="reference"]')
   await page.type('input[name="reference"]','John 3:16')
   const old=await reference();await page.keyboard.press('ArrowLeft');assert.equal(await reference(),old,'Input arrows navigated Scripture')
   await page.keyboard.press('Escape')
@@ -48,7 +49,7 @@ try {
   await page.click('[data-qa="enter-mode"]')
   const mobileInitial=await reference()
   await page.keyboard.press('Space')
-  await page.waitForFunction(old=>document.querySelector('.passage-button')?.textContent!==old,{},mobileInitial)
+  await page.waitForFunction(old=>document.querySelector('.reference-picker')?.textContent!==old,{},mobileInitial)
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Mobile horizontal overflow')
   assert.ok(await page.evaluate(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Exit writing mode');if(!b)return false;const r=b.getBoundingClientRect();return r.width>0&&r.height>0&&r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight}),'Mobile exit not visible')
   await page.screenshot({path:`qa/writing-mobile-${reduced?'reduced':'normal'}.png`})

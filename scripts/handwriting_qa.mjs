@@ -1,8 +1,9 @@
+import { returningUser } from './qa-user.mjs'
 import puppeteer from 'puppeteer-core'
 import assert from 'node:assert/strict'
 const b=await puppeteer.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true})
 try{
-const p=await b.newPage(); const errors=[];p.on('pageerror',e=>errors.push(e.message));await p.setViewport({width:1440,height:900});await p.goto(process.env.QA_URL||'http://127.0.0.1:4173/',{waitUntil:'networkidle0'});await p.waitForSelector('.verse.active p');
+const p=await b.newPage();await returningUser(p); const errors=[];p.on('pageerror',e=>errors.push(e.message));await p.setViewport({width:1440,height:900});await p.goto(process.env.QA_URL||'http://127.0.0.1:4173/',{waitUntil:'networkidle0'});await p.waitForSelector('.verse.active p');
 const rect=()=>p.$eval('.verse.active p',e=>{let r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width}})
 const num=()=>p.$eval('.verse.active sup',e=>e.textContent)
 assert.equal(await p.$$eval('.verse',e=>e.length),1);assert.equal(await p.$('.topbar'),null);assert.equal(await p.$('[name="translation"]'),null);

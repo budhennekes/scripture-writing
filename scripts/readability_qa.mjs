@@ -1,8 +1,9 @@
+import { returningUser } from './qa-user.mjs'
 import puppeteer from 'puppeteer-core'
 import assert from 'node:assert/strict'
 const browser = await puppeteer.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true})
 try {
- const page = await browser.newPage()
+ const page = await browser.newPage();await returningUser(page)
  const errors=[]; page.on('pageerror',e=>errors.push(e.message))
  await page.setViewport({width:390,height:844})
  await page.goto('http://127.0.0.1:4173/?readability=1',{waitUntil:'networkidle0'})

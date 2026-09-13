@@ -1,8 +1,9 @@
+import { returningUser } from './qa-user.mjs'
 import puppeteer from 'puppeteer-core'
 import assert from 'node:assert/strict'
 const browser=await puppeteer.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true})
 try {
- const p=await browser.newPage();await p.setViewport({width:1440,height:900});
+ const p=await browser.newPage();await returningUser(p);await p.setViewport({width:1440,height:900});
  await p.goto(process.env.QA_URL||'http://127.0.0.1:4173/',{waitUntil:'networkidle0'});await p.waitForSelector('.verse.active')
  const saved=()=>p.evaluate(()=>JSON.parse(localStorage.getItem('scripture-scribe-library-v3')).translations.WEB.position)
  const original=await saved()

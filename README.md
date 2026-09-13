@@ -49,7 +49,17 @@ The reader defaults to one verse, with an optional two-verse view in Settings. A
 
 ## Current acceptance gate
 
-Run `npm run qa` (handwriting flow), `node scripts/readability_qa.mjs`, and `node scripts/reference_picker_qa.mjs`. Older browser/release/writing-layout tests retain selectors from the superseded multi-toolbar interface and are historical, not release gates.
+Run `npm run qa:release` against the production preview. This runs 15 active suites, including onboarding, ordinary writing, phone layouts, private imports, random-return protection, persisted settings, native fullscreen and its fallback, stable Scripture geometry, reduced motion, and dialog focus. The fullscreen, persistence, and writing-acceptance selectors now match the chapel interface. Other older browser/release/layout scripts remain historical, not release gates.
+
+## First visit and interaction details
+
+New visitors get one skippable welcome: bring a notebook, choose a writing hand, and choose a passage or begin with Genesis. Changing hands moves the small desk preview and the real controls. Existing library or legacy saves bypass the welcome. Dismissal is stored separately under `scripture-scribe-introduction-v1`; Settings → **Show introduction** reopens it without resetting a passage or preference. No analytics or accounts are added.
+
+Book chapters expand and collapse with a rotating disclosure marker. Panels have short entrances and faster, inert exits; changing panel type resets its scroll position so a scrolled welcome cannot obscure starter passages behind the chooser's sticky heading. Selection indicators connect the two handedness and verse-count options and the testament tabs. In writing mode the controls recede before the chapel fades, while Scripture retains its anchor. Ordinary verse advancement does not animate Scripture.
+
+A brief **Saved** label appears at the bookmark only after browser storage succeeds. The existing persistent storage-error message remains authoritative if saving fails. Reduced motion removes spatial transitions; controls and labels still communicate every state.
+
+Reference patterns: [Transitions.dev](https://transitions.dev/) panel reveal, accordion, and sliding selections; [ScreensDesign](https://screensdesign.com/) as the onboarding research reference. Gated screen recordings were not reviewed or copied. No third-party motion library or copied Pro code was added.
 
 ## Development
 
@@ -65,17 +75,11 @@ npm run build
 npm run preview -- --host 127.0.0.1 --port 4173
 # In another terminal:
 npm run lint
-npm run qa
-node scripts/mvp_qa.mjs
-node scripts/readability_qa.mjs
-node scripts/minimal_ui_qa.mjs
-node scripts/design_matrix.mjs
-node scripts/persistence_qa.mjs
-node scripts/release_qa.mjs
+npm run qa:release
 python3 scripts/data_qa.py
 ```
 
-Browser tests use an isolated headless Google Chrome instance. The release test also supports `QA_URL` and `CHROME_PATH`.
+Browser tests use isolated headless Google Chrome instances. Current live-capable suites accept `QA_URL`; persistence QA intentionally exercises localhost migration data. Phone checks simulate viewport and touch behavior, not physical iPhone/Safari hardware.
 
 ## Public deployment
 
@@ -84,7 +88,8 @@ Source lives on `main`; compiled static assets are deployed to `gh-pages`. Publi
 ```sh
 DEPLOY_BASE=/scripture-writing/ npm run build
 python3 scripts/deploy_pages.py
-QA_URL=https://budhennekes.github.io/scripture-writing/ node scripts/release_qa.mjs
+QA_URL=https://budhennekes.github.io/scripture-writing/ node scripts/onboarding_qa.mjs
+QA_URL=https://budhennekes.github.io/scripture-writing/ node scripts/phone_qa.mjs
 ```
 
 GitHub Pages must serve `gh-pages` from `/`. Do not deploy `.env` files, browser data, source downloads, or QA artifacts.
