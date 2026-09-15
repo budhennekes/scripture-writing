@@ -99,3 +99,34 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .app-shell .page-ribbon::before {content:none;}
 .app-shell .page-ribbon {border-radius:var(--control-radius);color:var(--accent);}
 .app-shell .page-ribbon.selected,.app-shell .page-ribbon.selected:hover {background:var(--accent-soft);color:var(--accent);}
+
+/* Reader controls: one quiet toolbar and a compact free-hand pair. */
+.app-shell .writing-tools .reference-picker {border:0;background:transparent;padding:0;min-height:44px;gap:12px;}
+.app-shell .reference-picker .picker-copy>span:first-child {font-size:18px;font-weight:600;line-height:1.25;}
+.app-shell .reference-picker .picker-label {font-size:13px;line-height:1.35;}
+.app-shell .writing-tools .writing-mode-button,.app-shell .writing-tools .writing-mode-button:not([aria-pressed=true]),.app-shell .writing-tools .setup-button {border:0;background:transparent;color:var(--ink);}
+.app-shell .writing-tools .writing-mode-button,.app-shell .reader-random {font-size:15px;font-weight:500;padding:10px 8px;}
+.app-shell .writing-tools .writing-mode-button:hover,.app-shell .writing-tools .setup-button:hover {background:var(--accent-soft);}
+.app-shell .writing-tools .writing-mode-button[aria-pressed=true] {color:var(--accent);background:var(--accent-soft);}
+@media(min-width:601px) {
+ .app-shell .control-rail {gap:12px;}
+ .app-shell .control-rail .next-button {height:120px;min-height:120px;gap:10px;font-size:17px;}
+ .app-shell .control-rail .previous-button {height:56px;min-height:56px;gap:4px;border-color:transparent;background:var(--accent-soft);font-size:15px;}
+}
+@media(max-width:1000px) {
+ .app-shell .writing-tools {display:grid;grid-template-columns:minmax(0,1fr) auto 44px;grid-template-rows:44px 44px;gap:0 8px;align-content:center;padding-top:4px;padding-bottom:4px;}
+ .app-shell .writing-tools .writing-reference {grid-column:1/-1;grid-row:1;min-width:0;padding-right:0;}
+ .app-shell .writing-tools .reader-random {grid-column:1;grid-row:2;justify-self:start;padding-left:0;}
+ .app-shell .writing-tools .writing-mode-button {grid-column:2;grid-row:2;}
+ .app-shell .writing-tools .setup-button {grid-column:3;grid-row:2;}
+ .app-shell .writing-tools .reference-picker {max-width:100%;}
+}
+@media(max-width:380px) {
+ .app-shell .writing-tools {column-gap:2px;}
+ .app-shell .writing-tools .writing-mode-button,.app-shell .reader-random {font-size:13px;padding-right:4px;padding-left:4px;}
+}
+@media(max-width:1000px) and (max-height:500px) and (pointer:coarse) {
+ .app-shell .writing-tools {display:flex;flex-wrap:nowrap;gap:6px;}
+ .app-shell .control-rail .next-button {height:48px;min-height:48px;}
+ .app-shell .control-rail .previous-button {height:48px;min-height:48px;}
+}

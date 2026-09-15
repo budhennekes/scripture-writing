@@ -41,7 +41,7 @@ The reference control visibly says **Choose a passage** outside writing mode. Th
 
 ## Material finish
 
-Controls and book choices use flat colors, thin borders, and no decorative texture, gradients, bevels, or shadows. Light themes share a deep blue-green accent; Night keeps a lighter accessible accent. Next is the main filled action, while writing mode is a quieter outlined control. The chapel background, Scripture typography, and writing geometry remain unchanged. `node scripts/material_qa.mjs` checks palette contrast and verifies untextured, shadow-free book choices and Next controls.
+Controls and book choices use flat colors, thin borders, and no decorative texture, gradients, bevels, or shadows. Light themes share a deep blue-green accent; Night keeps a lighter accessible accent. Next is a compact 120px-tall filled action on desktop and tablet. The toolbar uses aligned, unboxed controls with a deliberate two-row layout at narrower widths. The phone dock stays unchanged. `node scripts/toolbar_qa.mjs` checks intermediate widths, toolbar containment, and target sizes. The chapel background, Scripture typography, and writing geometry remain unchanged. `node scripts/material_qa.mjs` checks palette contrast and verifies untextured, shadow-free book choices and Next controls.
 
 ## Visual setting
 
