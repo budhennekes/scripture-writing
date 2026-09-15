@@ -130,3 +130,24 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
  .app-shell .control-rail .next-button {height:48px;min-height:48px;}
  .app-shell .control-rail .previous-button {height:48px;min-height:48px;}
 }
+
+/* Passage chooser: editorial titles, clear labels, readable supporting text. */
+.navigator-dialog .dialog-heading h1 {font-size:44px;font-weight:500;line-height:1.12;letter-spacing:-.025em;}
+.navigator-dialog .starting-points h2,.navigator-dialog .book-browser h2 {font:600 21px/1.35 var(--ui-font);letter-spacing:0;margin-bottom:16px;}
+.navigator-dialog .starting-points strong,.navigator-dialog .book-cover strong {font:400 26px/1.15 'Newsreader Variable',Georgia,serif;letter-spacing:-.01em;}
+.navigator-dialog .starting-points span,.navigator-dialog .book-cover span {font:400 15px/1.5 var(--ui-font);letter-spacing:0;}
+.navigator-dialog .book-group h3 {font:600 16px/1.4 var(--ui-font);}
+.navigator-dialog .book-group h3>span {font:400 15px/1.4 var(--ui-font);}
+.navigator-dialog .navigator-utilities .navigator-translation {font:600 15px/1.4 var(--ui-font);}
+.navigator-dialog .navigator-utilities .navigator-translation select,.navigator-dialog .navigator-utilities .reference-search input {font:400 16px/1.4 var(--ui-font);}
+.navigator-dialog .continue-place {font-size:17px;line-height:1.4;}
+.navigator-dialog .continue-place span,.navigator-dialog .discovery-alternative .random-note {font:400 15px/1.5 var(--ui-font);}
+.navigator-dialog .discovery-alternative .random-verse,.navigator-dialog .discovery-alternative .return-place {font:600 16px/1.4 var(--ui-font);}
+/* The compound search field owns focus; its inner input has no second frame. */
+.navigator-dialog .reference-search input,.navigator-dialog .reference-search input:focus,.navigator-dialog .reference-search input:focus-visible {border:0;border-radius:0;outline:none;box-shadow:none;background:transparent;min-width:0;}
+.navigator-dialog .reference-search:focus-within {border-color:transparent;outline:2px solid var(--accent);outline-offset:0;}
+@media(max-width:600px) {
+ .navigator-dialog .dialog-heading h1 {font-size:36px;}
+ .navigator-dialog .starting-points strong,.navigator-dialog .book-cover strong {font-size:23px;}
+ .navigator-dialog .book-cover span {font-size:14px;}
+}
