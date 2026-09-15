@@ -6,7 +6,7 @@ try {
  const page = await browser.newPage();await returningUser(page)
  const errors=[]; page.on('pageerror',e=>errors.push(e.message))
  await page.setViewport({width:390,height:844})
- await page.goto('http://127.0.0.1:4173/?readability=1',{waitUntil:'networkidle0'})
+ await page.goto(process.env.QA_URL||'http://127.0.0.1:4173/?readability=1',{waitUntil:'networkidle0'})
  const target=await page.evaluate(async()=>{
   const bible=await (await fetch('/data/bible.json')).json()
   let longest={text:'',position:null}

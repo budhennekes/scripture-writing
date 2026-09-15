@@ -33,8 +33,8 @@ button {font-weight:600;letter-spacing:0;}
 .room-identity p {font-weight:500;letter-spacing:-.03em;}
 .testament-tabs button {font-size:16px;}
 .restore-hint,.specific-passage summary,.personal-import summary {font-size:16px;font-weight:600;}
-/* One unmistakable primary action, quieter but tangible secondary actions. */
-.app-shell .control-rail .next-button {background:var(--accent);color:var(--page);border:1px solid var(--accent);border-radius:var(--control-radius);box-shadow:0 3px 8px rgb(10 23 31 / 12%);font:600 19px/1.2 var(--ui-font);gap:20px;}
+/* Flat color and type establish hierarchy, never simulated materials. */
+.app-shell .control-rail .next-button {background:var(--accent);color:var(--page);border:1px solid var(--accent);border-radius:var(--control-radius);box-shadow:none;font:600 19px/1.2 var(--ui-font);gap:20px;}
 .app-shell .control-rail .previous-button {border:1px solid var(--control-border);border-radius:var(--control-radius);background:var(--page);color:var(--ink);font:600 16px/1.2 var(--ui-font);}
 .app-shell .control-rail .rail-button:disabled {opacity:.42;box-shadow:none;cursor:default;}
 .primary-button,.writing-tools .writing-mode-button:not([aria-pressed=true]) {border-radius:var(--control-radius);font-size:16px;font-weight:600;min-height:48px;padding:12px 20px;}
@@ -84,3 +84,18 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
  .app-shell .reader-random {font-size:13px;}
 }
 @media(prefers-reduced-motion:reduce) {button,input,select {transition:none!important;}}
+
+/* Minimal surface system; retain functional states without faux depth. */
+:root[data-theme='paper'],:root[data-theme='gray'],:root[data-theme='sage'] {--accent:#315d62;--accent-soft:color-mix(in srgb,var(--accent) 8%,var(--page));}
+.app-shell button,.settings-dialog button,.welcome-dialog button {background-image:none;box-shadow:none;text-shadow:none;}
+.primary-button {background:var(--accent);color:var(--page);border:1px solid var(--accent);}
+.app-shell .writing-tools .writing-mode-button:not([aria-pressed=true]) {background:var(--page);color:var(--ink);border:1px solid var(--control-border);box-shadow:none;}
+.book-cover,.book-cover:hover,.book-cover[aria-expanded=true] {background-image:none;border-width:1px;border-radius:8px;box-shadow:none;}
+.book-cover {border-color:var(--line);background:var(--page);}
+.book-cover:hover,.book-cover[aria-expanded=true] {border-color:var(--accent);background:var(--accent-soft);}
+.chapter-grid button:not([aria-current='location']):not(:hover) {background:var(--page);}
+.primary-button:hover:not(:disabled) {background:color-mix(in srgb,var(--accent) 90%,var(--ink));}
+.app-shell .writing-tools .writing-mode-button:hover:not([aria-pressed=true]) {background:var(--accent-soft);}
+.app-shell .page-ribbon::before {content:none;}
+.app-shell .page-ribbon {border-radius:var(--control-radius);color:var(--accent);}
+.app-shell .page-ribbon.selected,.app-shell .page-ribbon.selected:hover {background:var(--accent-soft);color:var(--accent);}

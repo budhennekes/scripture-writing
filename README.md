@@ -41,7 +41,7 @@ The reference control visibly says **Choose a passage** outside writing mode. Th
 
 ## Material finish
 
-Controls use restrained tonal gradients and inset highlights. Book tiles have a tiny bundled SVG grain and muted binding colors by section. Scripture stays untextured. The four existing themes retain their backgrounds with richer matching accents. `node scripts/material_qa.mjs` checks palette text and filled-button gradient endpoint contrast; phone and geometry suites remain unchanged.
+Controls and book choices use flat colors, thin borders, and no decorative texture, gradients, bevels, or shadows. Light themes share a deep blue-green accent; Night keeps a lighter accessible accent. Next is the main filled action, while writing mode is a quieter outlined control. The chapel background, Scripture typography, and writing geometry remain unchanged. `node scripts/material_qa.mjs` checks palette contrast and verifies untextured, shadow-free book choices and Next controls.
 
 ## Visual setting
 
