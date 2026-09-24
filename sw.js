@@ -1,5 +1,5 @@
 const PREFIX = 'scripture-scribe-'
-const CACHE_NAME = PREFIX + 'v18-simplified-reader-icons'
+const CACHE_NAME = PREFIX + 'v19-cross-identity-reading-nav'
 const root = self.registration.scope
 const APP_SHELL = ['./', 'site.webmanifest', 'favicon.ico', 'favicon.svg', 'favicon-96x96.png', 'apple-touch-icon.png', 'web-app-manifest-192x192.png', 'web-app-manifest-512x512.png', 'data/bible.json', 'data/asv1901.json', 'data/bsb.json', 'data/dra.json', 'data/import-example.json'].map(path => new URL(path, root).href)
 self.addEventListener('install', event => {
