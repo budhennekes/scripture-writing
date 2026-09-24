@@ -1,7 +1,7 @@
 const PREFIX = 'scripture-scribe-'
-const CACHE_NAME = PREFIX + 'v17-chooser-type'
+const CACHE_NAME = PREFIX + 'v18-simplified-reader-icons'
 const root = self.registration.scope
-const APP_SHELL = ['./', 'manifest.webmanifest', 'scribe-mark.svg', 'images/chapel-light.webp', 'data/bible.json', 'data/asv1901.json', 'data/bsb.json', 'data/dra.json', 'data/import-example.json'].map(path => new URL(path, root).href)
+const APP_SHELL = ['./', 'site.webmanifest', 'favicon.ico', 'favicon.svg', 'favicon-96x96.png', 'apple-touch-icon.png', 'web-app-manifest-192x192.png', 'web-app-manifest-512x512.png', 'data/bible.json', 'data/asv1901.json', 'data/bsb.json', 'data/dra.json', 'data/import-example.json'].map(path => new URL(path, root).href)
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)))
   self.skipWaiting()
