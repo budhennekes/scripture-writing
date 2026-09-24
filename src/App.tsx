@@ -11,6 +11,7 @@ import './polish.css'
 import './interactions.css'
 import './typography-controls.css'
 import './simplify.css'
+import './navigation.css'
 import { BookChapters } from './interactions'
 import { usePanelMotion } from './panel-motion'
 import { importInfo, readImport, storeImport } from './local-bible'
@@ -474,7 +475,7 @@ function App() {
     return (
       <main className="status-screen" aria-live="polite">
         <p className="wordmark">Scripture, by hand</p>
-        <div className="loading-mark" aria-hidden="true">S</div>
+        <svg className="loading-mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M22 6h4v11h10v4H26v21h-4V21H12v-4h10z" /></svg>
         <p>Preparing your place.</p>
       </main>
     )
@@ -539,7 +540,7 @@ function App() {
             <span>Back</span>
           </button>
           <button ref={nextButtonRef} type="button" className="rail-button next-button" onClick={() => move(1)} disabled={atEnd} aria-label={versesPerView === 2 ? 'Next verses' : 'Next verse'}>
-            <span>Next</span>
+            <span>{focusWriting ? (versesPerView === 2 ? 'Next verses' : 'Next verse') : 'Next'}</span>
             <ArrowDownIcon />
           </button>
         </div>

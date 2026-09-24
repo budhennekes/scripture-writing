@@ -28,12 +28,12 @@ try {
       const nextBounds = next.getBoundingClientRect()
       const backBounds = back.getBoundingClientRect()
       return {
-        next: { width: nextBounds.width, height: nextBounds.height, background: nextStyle.backgroundColor, color: nextStyle.color, shadow: nextStyle.boxShadow, radius: nextStyle.borderRadius },
-        back: { width: backBounds.width, height: backBounds.height, background: backStyle.backgroundColor, color: backStyle.color, radius: backStyle.borderRadius },
+        next: { width: nextBounds.width, height: nextBounds.height, background: nextStyle.backgroundColor, color: nextStyle.color, shadow: nextStyle.boxShadow, radius: nextStyle.borderRadius, weight: Number(nextStyle.fontWeight) },
+        back: { width: backBounds.width, height: backBounds.height, background: backStyle.backgroundColor, color: backStyle.color, radius: backStyle.borderRadius, weight: Number(backStyle.fontWeight) },
         root: {
           page: getComputedStyle(document.documentElement).getPropertyValue('--page').trim(),
           limestone: getComputedStyle(document.documentElement).getPropertyValue('--page-deep').trim(),
-          olive: getComputedStyle(document.documentElement).getPropertyValue('--olive').trim(),
+          inkRgb: (() => { const probe = document.createElement('span'); probe.style.color = 'var(--ink)'; document.body.append(probe); const value = getComputedStyle(probe).color; probe.remove(); return value })(),
           amber: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
         },
       }
@@ -41,13 +41,16 @@ try {
 
     assert.equal(controls.root.page, '#fffdf7')
     assert.equal(controls.root.limestone, '#e9e1cf')
-    assert.equal(controls.root.olive, '#3c5a41')
     assert.equal(controls.root.amber, '#a9702f')
     assert.ok(controls.next.width >= 44 && controls.next.height >= 44, `${label}: Next misses the minimum touch target.`)
     assert.ok(controls.back.width >= 44 && controls.back.height >= 44, `${label}: Back misses the minimum touch target.`)
-    assert.notEqual(controls.next.background, controls.back.background, `${label}: Next and Back need distinct hierarchy.`)
-    assert.notEqual(controls.next.shadow, 'none', `${label}: Next needs restrained elevation.`)
-    assert.notEqual(controls.next.radius, '0px', `${label}: Next needs a refined corner treatment.`)
+    // Approved 2026-09-24: neutral reading navigation. Ivory/ink, no green fill, no elevation;
+    // hierarchy comes from size and type weight, not saturated colour.
+    assert.ok(!['rgb(60, 90, 65)', 'rgb(113, 135, 100)'].includes(controls.next.background), `${label}: Next still uses the retired green fill.`)
+    assert.equal(controls.next.shadow, 'none', `${label}: Next should sit flat on the page.`)
+    assert.equal(controls.next.color, controls.root.inkRgb, `${label}: Next label should be set in ink.`)
+    assert.ok(controls.next.width * controls.next.height > controls.back.width * controls.back.height, `${label}: Next must be the larger target.`)
+    assert.ok(controls.next.weight > controls.back.weight || controls.next.width > controls.back.width, `${label}: Next needs typographic priority.`)
     await page.screenshot({ path: `artifacts/abbey-controls-qa/${label}-after.png` })
     await page.close()
   }
@@ -77,7 +80,7 @@ try {
   await page.reload({ waitUntil: 'networkidle0' })
   assert.equal(await page.$eval('.next-button', button => getComputedStyle(button).transitionDuration), '0s')
   await page.close()
-  console.log('PASS: abbey palette roles, primary/secondary control hierarchy, touch targets, night contrast, and reduced-motion controls verified at desktop, tablet, and phone widths.')
+  console.log('PASS: reader palette roles, neutral ink navigation (no green/elevation), primary/secondary hierarchy, touch targets, night contrast, and reduced-motion controls verified at desktop, tablet, and phone widths.')
 } finally {
   await browser.close()
 }
