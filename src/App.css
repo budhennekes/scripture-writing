@@ -3,38 +3,45 @@
 
 :root {
   font-family: 'Source Sans 3 Variable', 'Segoe UI', sans-serif;
-  color: #27251f;
-  background: #f2ede2;
+  color: #2d332a;
+  background: #e9e1cf;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --page: #f8f4ea;
-  --page-deep: #f2ede2;
-  --ink: #27251f;
-  --muted: #817b6e;
-  --faint: #aaa293;
-  --line: rgb(50 45 36 / 12%);
-  --accent: #765d3b;
-  --accent-soft: rgb(118 93 59 / 10%);
-  --rail: #24251f;
-  --rail-ink: #f7f1e5;
-  --shadow: 0 24px 80px rgb(45 39 28 / 12%);
+  /* Sunlit limestone around a luminous reading surface. */
+  --page: #fffdf7;
+  --page-deep: #e9e1cf;
+  --ink: #2d332a;
+  --muted: #6d7063;
+  --faint: #9a9a8e;
+  --line: rgb(72 68 52 / 16%);
+  --accent: #a9702f;
+  --accent-soft: rgb(169 112 47 / 12%);
+  --olive: #3c5a41;
+  --olive-hover: #314d37;
+  --olive-ink: #fffdf7;
+  --rail: #e9e1cf;
+  --rail-ink: #2d332a;
+  --shadow: 0 24px 80px rgb(60 53 38 / 14%);
 }
 
 :root[data-theme='night'] {
   color-scheme: dark;
-  color: #ebe5d9;
-  background: #171814;
-  --page: #1d1f1a;
-  --page-deep: #171814;
-  --ink: #ebe5d9;
-  --muted: #a7a194;
-  --faint: #777469;
-  --line: rgb(244 236 219 / 10%);
-  --accent: #c5a879;
-  --accent-soft: rgb(197 168 121 / 10%);
-  --rail: #0f100e;
-  --rail-ink: #f2ebdf;
+  color: #f3eee2;
+  background: #141812;
+  --page: #20271d;
+  --page-deep: #141812;
+  --ink: #f3eee2;
+  --muted: #c2bcad;
+  --faint: #858a7d;
+  --line: rgb(243 238 226 / 14%);
+  --accent: #d59b51;
+  --accent-soft: rgb(213 155 81 / 16%);
+  --olive: #718764;
+  --olive-hover: #819a72;
+  --olive-ink: #141812;
+  --rail: #181e15;
+  --rail-ink: #f3eee2;
   --shadow: none;
 }
 

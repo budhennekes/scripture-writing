@@ -2,6 +2,53 @@
 :root {
   --reader-ease: cubic-bezier(.16, 1, .3, 1);
   --reader-page: var(--page);
+  --page: #fffdf7;
+  --page-deep: #e9e1cf;
+  --ink: #2d332a;
+  --muted: #6d7063;
+  --faint: #9a9a8e;
+  --line: rgb(72 68 52 / 16%);
+  --accent: #a9702f;
+  --accent-soft: rgb(169 112 47 / 12%);
+  --olive: #3c5a41;
+  --olive-hover: #314d37;
+  --olive-ink: #fffdf7;
+  --rail: #e9e1cf;
+  --rail-ink: #2d332a;
+}
+
+:root[data-theme='paper'],
+:root[data-theme='gray'],
+:root[data-theme='sage'] {
+  --page: #fffdf7;
+  --page-deep: #e9e1cf;
+  --ink: #2d332a;
+  --muted: #6d7063;
+  --faint: #9a9a8e;
+  --line: rgb(72 68 52 / 16%);
+  --accent: #a9702f;
+  --accent-soft: rgb(169 112 47 / 12%);
+  --olive: #3c5a41;
+  --olive-hover: #314d37;
+  --olive-ink: #fffdf7;
+  --rail: #e9e1cf;
+  --rail-ink: #2d332a;
+}
+
+:root[data-theme='night'] {
+  --page: #20271d;
+  --page-deep: #141812;
+  --ink: #f3eee2;
+  --muted: #c2bcad;
+  --faint: #858a7d;
+  --line: rgb(243 238 226 / 14%);
+  --accent: #d59b51;
+  --accent-soft: rgb(213 155 81 / 16%);
+  --olive: #718764;
+  --olive-hover: #819a72;
+  --olive-ink: #141812;
+  --rail: #181e15;
+  --rail-ink: #f3eee2;
 }
 
 .landscape-scene,
@@ -45,7 +92,7 @@ body {
   border-inline-end: 1px solid var(--line);
   border-radius: 0;
   color: var(--muted);
-  background: var(--page);
+  background: var(--rail);
   box-shadow: none;
 }
 
@@ -57,27 +104,35 @@ body {
 .rail-button,
 .control-rail .next-button,
 .control-rail .previous-button {
-  align-self: stretch;
   min-height: 44px;
-  height: auto;
   border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: inherit;
+  border-radius: 6px;
   font-family: 'Source Sans 3 Variable', 'Segoe UI', sans-serif;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 650;
+  letter-spacing: .01em;
 }
 
 .control-rail .previous-button {
+  align-self: stretch;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  background: transparent;
 }
 
-.control-rail .next-button {
+.app-shell .control-rail .next-button {
+  align-self: start;
+  width: 52px;
+  height: 152px;
+  margin: 16px auto;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
+  border: 1px solid var(--olive);
+  color: var(--olive-ink);
+  background: var(--olive);
+  box-shadow: 0 5px 12px rgb(39 62 42 / 20%), inset 0 1px 0 rgb(255 255 255 / 12%);
   font-size: 13px;
 }
 
@@ -88,18 +143,37 @@ body {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .rail-button:not(:disabled):hover {
-    background: var(--accent-soft);
+  .control-rail .previous-button:not(:disabled):hover {
+    background: rgb(255 253 247 / 56%);
     color: var(--ink);
+  }
+
+  .control-rail .next-button:not(:disabled):hover {
+    border-color: var(--olive-hover);
+    background: var(--olive-hover);
+    box-shadow: 0 7px 16px rgb(39 62 42 / 26%), inset 0 1px 0 rgb(255 255 255 / 14%);
   }
 }
 
 button:not(:disabled) {
-  transition: transform 140ms var(--reader-ease), background-color 140ms ease, color 140ms ease, border-color 140ms ease, opacity 140ms ease;
+  transition: transform 140ms var(--reader-ease), background-color 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease, opacity 140ms ease;
 }
 
 button:not(:disabled):active {
-  transform: scale(.96);
+  transform: scale(.97);
+}
+
+.control-rail .next-button:focus-visible,
+.control-rail .previous-button:focus-visible {
+  outline-color: var(--accent);
+  outline-offset: 3px;
+}
+
+.control-rail .next-button:disabled {
+  border-color: var(--line);
+  color: var(--muted);
+  background: transparent;
+  box-shadow: none;
 }
 
 .app-shell .reader-panel,
@@ -353,16 +427,27 @@ button:not(:disabled):active {
     min-height: 56px;
     height: 56px;
     flex: 1;
+    margin: 0;
     flex-direction: row;
     border: 1px solid var(--line);
-    border-radius: 4px;
+    border-radius: 7px;
+    color: var(--ink);
+    background: rgb(255 253 247 / 54%);
   }
 
   .app-shell .control-rail .next-button {
     flex: 2;
-    color: var(--page);
-    background: var(--accent);
-    border-color: var(--accent);
+    border-color: var(--olive);
+    color: var(--olive-ink);
+    background: var(--olive);
+    box-shadow: 0 4px 10px rgb(39 62 42 / 20%), inset 0 1px 0 rgb(255 255 255 / 12%);
+  }
+
+  .app-shell .control-rail .next-button:disabled {
+    border-color: var(--line);
+    color: var(--muted);
+    background: transparent;
+    box-shadow: none;
   }
 
   .app-shell .writing-tools {
