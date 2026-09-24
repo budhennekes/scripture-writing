@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Deploy an already-tested dist/ to this project's GitHub Pages branch.
-Run DEPLOY_BASE=/scripture-writing/ npm run build first.
+Run npm run build first (custom domain uses the root path).
 Requires explicit publishing approval and authenticated git/gh.
 """
 from pathlib import Path
@@ -17,7 +17,8 @@ def run(*args, cwd):
 def main():
     dist = ROOT / 'dist'
     assert (dist / 'index.html').is_file(), 'Build first'
-    assert '/scripture-writing/assets/' in (dist / 'index.html').read_text(), 'Wrong deployment base'
+    assert '/assets/' in (dist / 'index.html').read_text() and '/scripture-writing/assets/' not in (dist / 'index.html').read_text(), 'Wrong deployment base'
+    assert (dist / 'CNAME').read_text().strip() == 'scripturebyhand.com', 'Missing custom domain'
     with tempfile.TemporaryDirectory(prefix='scripture-pages-') as tmp:
         work = Path(tmp)
         result = subprocess.run(['git', 'ls-remote', '--exit-code', '--heads', REMOTE, 'gh-pages'], capture_output=True)
