@@ -532,15 +532,17 @@ function App() {
         activeVerseRef.current?.focus({ preventScroll: true })
       }
     }} className={`app-shell ${controlsOnLeft ? 'controls-left' : 'controls-right'} ${focusWriting ? 'focus-writing' : ''}`}>
-      <aside className="control-rail" inert={Boolean(panel)} aria-label="Writing controls">
-        <button ref={previousButtonRef} type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label={versesPerView === 2 ? 'Previous verses' : 'Previous verse'}>
-          <ArrowUpIcon />
-          <span>Back</span>
-        </button>
-        <button ref={nextButtonRef} type="button" className="rail-button next-button" onClick={() => move(1)} disabled={atEnd} aria-label={versesPerView === 2 ? 'Next verses' : 'Next verse'}>
-          <span>Next</span>
-          <ArrowDownIcon />
-        </button>
+      <aside className="control-rail" inert={Boolean(panel)} aria-label="Verse navigation">
+        <div className="control-stack">
+          <button ref={previousButtonRef} type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label={versesPerView === 2 ? 'Previous verses' : 'Previous verse'}>
+            <ArrowUpIcon />
+            <span>Back</span>
+          </button>
+          <button ref={nextButtonRef} type="button" className="rail-button next-button" onClick={() => move(1)} disabled={atEnd} aria-label={versesPerView === 2 ? 'Next verses' : 'Next verse'}>
+            <span>Next</span>
+            <ArrowDownIcon />
+          </button>
+        </div>
       </aside>
 
       <section className="reader-panel" inert={Boolean(panel)}>

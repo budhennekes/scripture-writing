@@ -518,6 +518,147 @@ button:not(:disabled):active {
   }
 }
 
+/* Verse navigation: a single sequence control, not two floating old-style buttons. */
+.app-shell .control-rail {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+}
+
+.app-shell .control-stack {
+  display: grid;
+  grid-template-rows: 52px 104px;
+  gap: 8px;
+  width: 100%;
+  margin: auto 0 10px;
+}
+
+.app-shell .control-stack .rail-button {
+  width: 100%;
+  margin: 0;
+  border-radius: 10px;
+  box-shadow: none;
+  font-family: var(--ui-font);
+  font-weight: 650;
+  letter-spacing: .015em;
+}
+
+.app-shell .control-stack .previous-button {
+  flex-direction: row;
+  gap: 6px;
+  border: 1px solid transparent;
+  color: var(--muted);
+  background: transparent;
+}
+
+.app-shell .control-stack .previous-button:not(:disabled):hover {
+  border-color: var(--line);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--page) 66%, transparent);
+}
+
+.app-shell .control-stack .next-button {
+  position: relative;
+  height: 104px;
+  min-height: 0;
+  overflow: hidden;
+  flex-direction: column;
+  gap: 7px;
+  border: 1px solid var(--olive);
+  border-radius: 12px;
+  color: var(--olive-ink);
+  background: var(--olive);
+  box-shadow: 0 6px 16px rgb(39 62 42 / 16%);
+  font-size: 14px;
+}
+
+.app-shell .control-stack .next-button::after {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 18px;
+  height: 1px;
+  content: '';
+  background: rgb(255 253 247 / 42%);
+}
+
+.app-shell .control-stack .next-button:not(:disabled):hover {
+  border-color: var(--olive-hover);
+  background: var(--olive-hover);
+  box-shadow: 0 8px 18px rgb(39 62 42 / 20%);
+}
+
+.app-shell .control-stack .next-button:not(:disabled):active {
+  transform: translateY(1px) scale(.98);
+  box-shadow: 0 3px 8px rgb(39 62 42 / 16%);
+}
+
+.app-shell .control-stack .next-button:disabled,
+.app-shell .control-stack .previous-button:disabled {
+  border-color: transparent;
+  color: var(--faint);
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 600px), (max-width: 1000px) and (max-height: 500px) and (pointer: coarse) {
+  .app-shell .control-rail,
+  .app-shell.controls-right .control-rail,
+  .app-shell.focus-writing .control-rail {
+    display: block;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app-shell .control-stack {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 0;
+    height: 58px;
+    margin: 0;
+  }
+
+  .app-shell.controls-right .control-stack {
+    flex-direction: row;
+  }
+
+  .app-shell .control-stack .rail-button {
+    height: 58px;
+    min-height: 58px;
+    border-radius: 0;
+  }
+
+  .app-shell .control-stack .previous-button {
+    flex: 1;
+    gap: 8px;
+    border: 1px solid var(--line);
+    border-radius: 10px 0 0 10px;
+    background: var(--page);
+  }
+
+  .app-shell .control-stack .next-button {
+    flex: 1.65;
+    flex-direction: row;
+    gap: 10px;
+    border-radius: 0 10px 10px 0;
+    box-shadow: 0 4px 10px rgb(39 62 42 / 14%);
+    font-size: 15px;
+  }
+
+  .app-shell.controls-right .control-stack .previous-button {
+    border-radius: 0 10px 10px 0;
+  }
+
+  .app-shell.controls-right .control-stack .next-button {
+    border-radius: 10px 0 0 10px;
+  }
+
+  .app-shell .control-stack .next-button::after {
+    right: 10px;
+    bottom: 8px;
+    width: 14px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   button:not(:disabled),
   .dialog-backdrop,
