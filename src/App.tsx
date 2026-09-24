@@ -10,6 +10,7 @@ import './phone.css'
 import './polish.css'
 import './interactions.css'
 import './typography-controls.css'
+import './simplify.css'
 import { BookChapters } from './interactions'
 import { usePanelMotion } from './panel-motion'
 import { importInfo, readImport, storeImport } from './local-bible'
@@ -146,7 +147,6 @@ function loadSavedState() {
         fontSize?: number
         theme?: Theme
         versesPerView?: number
-        shortcutHintDismissed?: boolean
         savedPlaces?: SavedPlace[]
       }
     }
@@ -217,7 +217,6 @@ function App() {
   const [draftPosition, setDraftPosition] = useState<Position>(saved.position ?? DEFAULT_POSITION)
   const [handedness, setHandedness] = useState<Handedness>(saved.handedness ?? 'right')
   const [versesPerView, setVersesPerView] = useState<1 | 2>(saved.versesPerView === 2 ? 2 : 1)
-  const [shortcutHintDismissed, setShortcutHintDismissed] = useState(Boolean(saved.shortcutHintDismissed))
   const [fontSize, setFontSize] = useState(saved.fontSize ?? 36)
   const [theme, setTheme] = useState<Theme>(BACKGROUNDS.some(option => option.value === saved.theme) ? saved.theme : 'paper')
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(saved.savedPlaces ?? [])
@@ -266,7 +265,7 @@ function App() {
     try {
       localStorage.setItem(LIBRARY_KEY, JSON.stringify(library.current))
       // Keep old WEB data intact and old global settings compatible.
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...loadSavedState(), handedness, fontSize, theme, versesPerView, shortcutHintDismissed,
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...loadSavedState(), handedness, fontSize, theme, versesPerView,
         ...(translation === 'WEB' ? { position: savedPosition, savedPlaces } : {}),
       }))
       setSaveError(false)
@@ -274,11 +273,11 @@ function App() {
       if (bookmarkPending.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         bookmarkButtonRef.current?.querySelector('svg')?.animate([
           { transform: 'translateY(-3px)' }, { transform: 'translateY(1px)', offset: 0.7 }, { transform: 'none' },
-        ], { duration: 200, easing: 'ease-out' })
+        ], { duration: 200, easing: 'cubic-bezier(.16,1,.3,1)' })
       }
     } catch { setSaveError(true) }
     bookmarkPending.current = false
-  }, [bible, translation, position, handedness, fontSize, theme, savedPlaces, saved, versesPerView, shortcutHintDismissed, randomReturn])
+  }, [bible, translation, position, handedness, fontSize, theme, savedPlaces, saved, versesPerView, randomReturn])
 
   useEffect(() => { if (!bookmarkMessage) return; const timer = window.setTimeout(() => setBookmarkMessage(false), 1600); return () => clearTimeout(timer) }, [bookmarkMessage])
   useEffect(() => { setGuideTop(null) }, [position, fontSize, translation])
@@ -533,8 +532,6 @@ function App() {
         activeVerseRef.current?.focus({ preventScroll: true })
       }
     }} className={`app-shell ${controlsOnLeft ? 'controls-left' : 'controls-right'} ${focusWriting ? 'focus-writing' : ''}`}>
-      <div className="landscape-scene" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}images/chapel-light.webp`} alt="" width="1672" height="941" /></div>
-      <div className="room-identity" aria-hidden={focusWriting}><p>Scripture, by hand.</p><span className="phone-note">Best on desktop or tablet. Works on phones, too.</span></div>
       <aside className="control-rail" inert={Boolean(panel)} aria-label="Writing controls">
         <button ref={previousButtonRef} type="button" className="rail-button previous-button" onClick={() => move(-1)} disabled={atStart} aria-label={versesPerView === 2 ? 'Previous verses' : 'Previous verse'}>
           <ArrowUpIcon />
@@ -553,7 +550,6 @@ function App() {
         </button>
         <div className="writing-tools">
           <span className="writing-reference"><button className="reference-picker" type="button" onClick={openNavigator} aria-haspopup="dialog" aria-label="Choose passage or translation"><span className="picker-copy"><span>{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation.startsWith('LOCAL_') ? 'Local' : translation}{randomReturn ? ' · Random' : ''}</span><span className="picker-label">Choose a passage</span></span><ChevronDownIcon /></button></span>
-          {!focusWriting && <button type="button" className="reader-random" onClick={randomVerse}>Random verse</button>}
           <button type="button" className="writing-mode-button" aria-pressed={focusWriting} onClick={focusWriting ? exitWriting : enterWriting}>{focusWriting ? 'Exit writing mode' : 'Enter writing mode'}</button>
           <button type="button" className="icon-button setup-button" onClick={() => setPanel('settings')} aria-label="Open settings"><SettingsIcon /></button>
           {positionNotice && <span role="status">{positionNotice}</span>}
@@ -608,11 +604,6 @@ function App() {
         </footer>
       </section>
 
-      {!shortcutHintDismissed && !panel && <aside className="shortcut-coach" aria-label="Keyboard tip">
-        <button type="button" aria-label="Dismiss keyboard tip" onClick={() => { setShortcutHintDismissed(true); requestAnimationFrame(restoreReaderFocus) }}>×</button>
-        <p>Keep your writing hand on the page.</p>
-        <div><kbd>{handedness === 'right' ? 'A' : '←'}</kbd> Back <kbd>{handedness === 'right' ? 'D' : '→'}</kbd> Next <span>Space works too.</span></div>
-      </aside>}
       <span className="sr-only" role="status">{bookmarkMessage && currentBookmark && !saveError ? 'Bookmark saved' : ''}</span>
       {shownPanel && (
         <div key={shownPanel} className="dialog-backdrop" data-closing={!panel || undefined} inert={!panel} aria-hidden={!panel || undefined} onMouseDown={() => setPanel(null)}>
@@ -630,7 +621,6 @@ function App() {
             <section className="settings-dialog navigator-dialog" role={panel ? 'dialog' : undefined} aria-modal={panel ? true : undefined} aria-labelledby="navigator-title" onMouseDown={(event) => event.stopPropagation()}>
               <div className="dialog-heading">
                 <div>
-                  <p className="eyebrow">Find your place</p>
                   <h1 id="navigator-title">Choose a passage.</h1>
                 </div>
                 <button type="button" className="close-button" onClick={() => setPanel(null)} aria-label="Close passage navigator">×</button>
@@ -751,7 +741,6 @@ function App() {
             <section className="settings-dialog" role={panel ? 'dialog' : undefined} aria-modal={panel ? true : undefined} aria-labelledby="settings-title" onMouseDown={(event) => event.stopPropagation()}>
               <div className="dialog-heading">
                 <div>
-                  <p className="eyebrow">Writing setup</p>
                   <h1 id="settings-title">Make it comfortable.</h1>
                 </div>
                 <button type="button" className="close-button" onClick={() => setPanel(null)} aria-label="Close settings">×</button>
@@ -792,12 +781,10 @@ function App() {
 
               <div className="settings-group"><div className="setting-copy"><h2>Line guide</h2><p>Mark the line you are copying.</p></div><button className="line-guide-button" type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button></div>
               <div className="settings-group"><div className="setting-copy"><h2>Verses in view</h2><p>Next advances past the displayed verses.</p></div><div className="segmented-control verse-choice" data-selection={versesPerView - 1} role="group" aria-label="Verses in view"><button type="button" className={versesPerView === 1 ? 'selected' : ''} aria-pressed={versesPerView === 1} onClick={() => setVersesPerView(1)}>One</button><button type="button" className={versesPerView === 2 ? 'selected' : ''} aria-pressed={versesPerView === 2} onClick={() => setVersesPerView(2)}>Two</button></div></div>
-              <div className="dialog-note">
-                <p>Designed for desktop and tablet, with a phone-friendly layout. On iPhone or another phone, prop it beside your notebook and use the bottom controls.</p>
-                <p><strong>Keyboard controls</strong></p>
-                <p>A / D, Space, or arrows move through verses. Press G to go to a passage. Press B to bookmark.</p>
-              </div>
-              {shortcutHintDismissed && <button type="button" className="restore-hint" onClick={() => setShortcutHintDismissed(false)}>Show keyboard tip again</button>}
+              <details className="dialog-note">
+                <summary>Keyboard shortcuts</summary>
+                <p>A / D, Space, or arrows move through verses. Press G to choose a passage or B to bookmark.</p>
+              </details>
               <button type="button" className="primary-button" onClick={() => setPanel(null)}>Return to writing</button>
               <button type="button" className="restore-hint" onClick={() => setPanel('welcome')}>Show introduction</button>
               <details className="personal-import"><summary>Import your own Bible text</summary>
