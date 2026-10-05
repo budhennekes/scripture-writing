@@ -12,6 +12,7 @@ import './interactions.css'
 import './typography-controls.css'
 import './simplify.css'
 import './navigation.css'
+import './reader-scene.css'
 import { BookChapters } from './interactions'
 import { usePanelMotion } from './panel-motion'
 import { importInfo, readImport, storeImport } from './local-bible'
@@ -138,21 +139,51 @@ function normalizeBookName(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]/g, '')
 }
 
+type SavedState = {
+  position?: Position
+  handedness?: Handedness
+  fontSize?: number
+  theme?: Theme
+  versesPerView?: 1 | 2
+  lineGuide?: boolean
+  savedPlaces?: SavedPlace[]
+}
+
+function isPosition(value: unknown): value is Position {
+  return Boolean(value && typeof value === 'object'
+    && Number.isInteger((value as Position).book)
+    && Number.isInteger((value as Position).chapter)
+    && Number.isInteger((value as Position).verse)
+    && (value as Position).book >= 0
+    && (value as Position).chapter >= 0
+    && (value as Position).verse >= 0)
+}
+
+function sanitizeSavedState(value: unknown): SavedState {
+  if (!value || typeof value !== 'object') return {}
+  const raw = value as Record<string, unknown>
+  const saved: SavedState = {}
+  if (isPosition(raw.position)) saved.position = raw.position
+  if (raw.handedness === 'right' || raw.handedness === 'left') saved.handedness = raw.handedness
+  if (typeof raw.fontSize === 'number' && Number.isFinite(raw.fontSize)) saved.fontSize = Math.max(26, Math.min(52, raw.fontSize))
+  if (typeof raw.theme === 'string' && BACKGROUNDS.some(option => option.value === raw.theme)) saved.theme = raw.theme as Theme
+  if (raw.versesPerView === 1 || raw.versesPerView === 2) saved.versesPerView = raw.versesPerView
+  if (typeof raw.lineGuide === 'boolean') saved.lineGuide = raw.lineGuide
+  if (Array.isArray(raw.savedPlaces)) {
+    saved.savedPlaces = raw.savedPlaces.filter((place): place is SavedPlace => Boolean(place && typeof place === 'object'
+      && typeof (place as SavedPlace).id === 'string'
+      && typeof (place as SavedPlace).savedAt === 'number'
+      && isPosition((place as SavedPlace).position)))
+  }
+  return saved
+}
+
 function loadSavedState() {
   try {
     const current = localStorage.getItem(STORAGE_KEY)
-    if (current) {
-      return JSON.parse(current) as {
-        position?: Position
-        handedness?: Handedness
-        fontSize?: number
-        theme?: Theme
-        versesPerView?: number
-        savedPlaces?: SavedPlace[]
-      }
-    }
+    if (current) return sanitizeSavedState(JSON.parse(current))
     const legacy = localStorage.getItem(LEGACY_STORAGE_KEY)
-    return legacy ? JSON.parse(legacy) : {}
+    return legacy ? sanitizeSavedState(JSON.parse(legacy)) : {}
   } catch {
     return {}
   }
@@ -208,18 +239,19 @@ function App() {
   const bookmarkButtonRef = useRef<HTMLButtonElement>(null)
   const bookmarkPending = useRef(false)
   const [previousHeight, setPreviousHeight] = useState(0)
-  const [lineGuide, setLineGuide] = useState(false)
+  const [lineGuide, setLineGuide] = useState(saved.lineGuide ?? false)
   const [guideHeight, setGuideHeight] = useState(54)
   const [guideTop, setGuideTop] = useState<number | null>(null)
   const [bible, setBible] = useState<Bible | null>(null)
   const [loadError, setLoadError] = useState(false)
+  const [loadAttempt, setLoadAttempt] = useState(0)
   const [position, setPosition] = useState<Position>(saved.position ?? DEFAULT_POSITION)
   const [randomReturn, setRandomReturn] = useState<Position | null>(null)
   const [draftPosition, setDraftPosition] = useState<Position>(saved.position ?? DEFAULT_POSITION)
   const [handedness, setHandedness] = useState<Handedness>(saved.handedness ?? 'right')
   const [versesPerView, setVersesPerView] = useState<1 | 2>(saved.versesPerView === 2 ? 2 : 1)
   const [fontSize, setFontSize] = useState(saved.fontSize ?? 36)
-  const [theme, setTheme] = useState<Theme>(BACKGROUNDS.some(option => option.value === saved.theme) ? saved.theme : 'paper')
+  const [theme, setTheme] = useState<Theme>(saved.theme ?? 'paper')
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(saved.savedPlaces ?? [])
   const { panel, shownPanel, setPanel } = usePanelMotion()
   const [bookmarkMessage, setBookmarkMessage] = useState(false)
@@ -242,7 +274,8 @@ function App() {
       .then((data) => {
         if (cancelled) return
         const stored = library.current.translations?.[translation]
-        const next = stored ? locate(data, stored.position) : translation === 'WEB' && validPosition(data, saved.position) ? saved.position : locate(data, carryPosition.current)
+        const savedPosition = saved.position
+        const next = stored ? locate(data, stored.position) : translation === 'WEB' && savedPosition && validPosition(data, savedPosition) ? savedPosition : locate(data, carryPosition.current)
         const requested = stored?.position ?? carryPosition.current
         setPositionNotice(requested && JSON.stringify(canonical(data, next)) !== JSON.stringify(requested) ? 'That reference is unavailable in this translation. Showing Genesis 1:1.' : '')
         setRandomReturn(null)
@@ -253,7 +286,7 @@ function App() {
       })
       .catch(() => { if (!cancelled) setLoadError(true) })
     return () => { cancelled = true }
-  }, [translation, saved])
+  }, [translation, saved, loadAttempt])
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -266,7 +299,7 @@ function App() {
     try {
       localStorage.setItem(LIBRARY_KEY, JSON.stringify(library.current))
       // Keep old WEB data intact and old global settings compatible.
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...loadSavedState(), handedness, fontSize, theme, versesPerView,
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...loadSavedState(), handedness, fontSize, theme, versesPerView, lineGuide,
         ...(translation === 'WEB' ? { position: savedPosition, savedPlaces } : {}),
       }))
       setSaveError(false)
@@ -278,7 +311,7 @@ function App() {
       }
     } catch { setSaveError(true) }
     bookmarkPending.current = false
-  }, [bible, translation, position, handedness, fontSize, theme, savedPlaces, saved, versesPerView, randomReturn])
+  }, [bible, translation, position, handedness, fontSize, theme, savedPlaces, saved, versesPerView, randomReturn, lineGuide])
 
   useEffect(() => { if (!bookmarkMessage) return; const timer = window.setTimeout(() => setBookmarkMessage(false), 1600); return () => clearTimeout(timer) }, [bookmarkMessage])
   useEffect(() => { setGuideTop(null) }, [position, fontSize, translation])
@@ -466,7 +499,11 @@ function App() {
       <main className="status-screen">
         <p className="wordmark">Scripture, by hand</p>
         <h1>The Bible text could not load.</h1>
-        <p>Refresh the page to try again, or return to WEB.</p><button onClick={() => setTranslation('WEB')}>Use WEB</button>
+        <p>Your place and settings are still saved in this browser. Check your connection, then try again.</p>
+        <div className="status-actions">
+          <button type="button" onClick={() => setLoadAttempt(attempt => attempt + 1)}>Try again</button>
+          {translation !== 'WEB' && <button type="button" onClick={() => setTranslation('WEB')}>Use WEB</button>}
+        </div>
       </main>
     )
   }
@@ -527,7 +564,11 @@ function App() {
   }
 
   return (
-    <main onClick={event => {
+    <>
+      <div className={`chapel-scene${focusWriting ? ' scene-hidden' : ''}`} aria-hidden="true">
+        <img src={`${import.meta.env.BASE_URL}images/chapel-light.webp`} alt="" width="1672" height="941" decoding="async" />
+      </div>
+      <main onClick={event => {
       // Pointer toolbar actions hand Space back to reading; Tab/Space remain native.
       if (event.detail > 0 && (event.target as HTMLElement).closest('.writing-tools button, .topbar button, .rail-button, .page-ribbon')) {
         activeVerseRef.current?.focus({ preventScroll: true })
@@ -808,6 +849,7 @@ function App() {
         </div>
       )}
     </main>
+    </>
   )
 }
 

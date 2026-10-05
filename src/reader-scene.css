@@ -1,0 +1,141 @@
+/*
+  Reader scene: restore the chapel atmosphere without changing the reader's
+  working geometry. Scripture stays on the same opaque page surface, while the
+  normal reader's surrounding chrome lets the bundled chapel show through.
+  Full writing mode remains rail-free and image-free.
+*/
+
+.chapel-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #3d4438;
+  transition: opacity 320ms ease;
+}
+
+.chapel-scene img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 40%;
+}
+
+.chapel-scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgb(18 25 16 / 32%), rgb(18 25 16 / 8%) 52%, rgb(18 25 16 / 26%)),
+    linear-gradient(180deg, rgb(18 25 16 / 8%), rgb(18 25 16 / 32%));
+}
+
+.app-shell:not(.focus-writing) {
+  z-index: 1;
+  background: transparent;
+}
+
+.app-shell:not(.focus-writing) .reader-panel {
+  background: transparent;
+}
+
+.app-shell:not(.focus-writing) .scripture-wrap {
+  position: relative;
+  isolation: isolate;
+  background: var(--page);
+  box-shadow: 0 18px 70px rgb(16 22 13 / 18%);
+}
+
+.app-shell:not(.focus-writing) .scripture-wrap::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: clamp(120px, 22vw, 340px);
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, var(--page), color-mix(in srgb, var(--page) 18%, transparent) 42%, transparent),
+    linear-gradient(180deg, rgb(18 25 16 / 8%), rgb(18 25 16 / 22%)),
+    url('/images/chapel-light.webp') center / cover;
+}
+
+.app-shell:not(.focus-writing) .scripture,
+.app-shell:not(.focus-writing) .chapter-label {
+  position: relative;
+  z-index: 1;
+}
+
+.app-shell:not(.focus-writing) .writing-tools,
+.app-shell:not(.focus-writing) .reader-footer {
+  background: color-mix(in srgb, var(--page) 78%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+.app-shell:not(.focus-writing) .topbar {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--page) 64%, transparent), transparent);
+}
+
+:root[data-theme='night'] .chapel-scene::after {
+  background: rgb(8 11 8 / 66%);
+}
+
+:root[data-theme='night'] .app-shell:not(.focus-writing) .scripture-wrap {
+  box-shadow: none;
+}
+
+@media (max-width: 1000px) {
+  .chapel-scene img {
+    object-position: 62% 44%;
+  }
+
+  .app-shell:not(.focus-writing) .scripture-wrap::after {
+    width: clamp(76px, 22vw, 180px);
+    background-position: 62% 44%;
+  }
+}
+
+@media (max-width: 600px) {
+  .chapel-scene img {
+    object-position: 66% 48%;
+  }
+
+  .chapel-scene::after {
+    background: linear-gradient(180deg, rgb(18 25 16 / 24%), rgb(18 25 16 / 42%));
+  }
+
+  .app-shell:not(.focus-writing) .scripture-wrap::after {
+    top: auto;
+    left: 0;
+    width: auto;
+    height: 72px;
+    background:
+      linear-gradient(180deg, var(--page), color-mix(in srgb, var(--page) 12%, transparent) 48%, transparent),
+      linear-gradient(180deg, rgb(18 25 16 / 10%), rgb(18 25 16 / 24%)),
+      url('/images/chapel-light.webp') 66% 48% / cover;
+  }
+}
+
+@media (max-width: 1000px) and (max-height: 500px) and (pointer: coarse) {
+  .chapel-scene {
+    display: none;
+  }
+}
+
+.chapel-scene.scene-hidden {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 320ms ease, visibility 0s 320ms;
+}
+
+.app-shell.focus-writing {
+  background: var(--page);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapel-scene {
+    transition: none !important;
+  }
+}

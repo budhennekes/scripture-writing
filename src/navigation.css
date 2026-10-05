@@ -181,6 +181,7 @@
   }
 
   .app-shell.focus-writing .control-rail,
+  .app-shell.controls-left.focus-writing .control-rail,
   .app-shell.controls-right.focus-writing .control-rail {
     position: fixed;
     z-index: 5;
@@ -244,18 +245,60 @@
 
 /* Phone writing mode: keep the bottom row (it reserves the safe area), make Next dominant. */
 @media (max-width: 600px), (max-width: 1000px) and (max-height: 500px) and (pointer: coarse) {
-  .app-shell.focus-writing .control-rail {
+  .app-shell.controls-left.focus-writing .scripture-wrap,
+  .app-shell.controls-right.focus-writing .scripture-wrap {
+    padding-right: 22px;
+    padding-left: 22px;
+  }
+
+  .app-shell.focus-writing .control-rail,
+  .app-shell.controls-left.focus-writing .control-rail,
+  .app-shell.controls-right.focus-writing .control-rail {
+    position: relative;
+    inset: auto;
+    grid-column: 1;
+    grid-row: 2;
+    display: block;
+    width: auto;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
     border-top-color: transparent;
     background: var(--page);
   }
 
+  .app-shell.focus-writing .control-rail .control-stack {
+    display: flex;
+    flex-direction: row-reverse;
+    grid-template-rows: none;
+    gap: 0;
+    height: 58px;
+    margin: 0;
+  }
+
+  .app-shell.controls-right.focus-writing .control-rail .control-stack {
+    flex-direction: row;
+  }
+
   .app-shell.focus-writing .control-rail .control-stack .previous-button {
     flex: 0 0 92px;
+    justify-self: auto;
+    height: 58px;
+    min-height: 58px;
   }
 
   .app-shell.focus-writing .control-rail .control-stack .next-button {
     flex: 1;
+    height: 58px;
+    min-height: 58px;
     font-size: 17px;
+  }
+}
+
+@media (max-width: 1000px) and (max-height: 500px) and (pointer: coarse) {
+  .app-shell.focus-writing .control-rail,
+  .app-shell.controls-left.focus-writing .control-rail,
+  .app-shell.controls-right.focus-writing .control-rail {
+    padding-top: 6px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
   }
 }
 

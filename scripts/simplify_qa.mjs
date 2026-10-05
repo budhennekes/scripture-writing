@@ -17,6 +17,8 @@ try {
     await page.evaluate(() => document.fonts.ready)
     assert.equal(await page.$('.landscape-scene'), null, 'Decorative room remains in the reader DOM')
     assert.equal(await page.$('.room-identity'), null, 'Decorative room identity remains in the reader DOM')
+    // Approved requirement: the chapel photograph frames the normal reader.
+    assert.ok(await page.$eval('.chapel-scene img', img => img.complete && img.naturalWidth > 0 && getComputedStyle(img.closest('.chapel-scene')).visibility === 'visible'), 'Chapel background missing from the normal reader')
     assert.equal(await page.$('.reader-random'), null, 'Random is duplicated in the reader toolbar')
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, 'Reader overflows horizontally')
     const toolbar = await page.$eval('.writing-tools', element => {
@@ -36,6 +38,9 @@ try {
     await page.waitForSelector('[role="dialog"]', { hidden: true })
     await page.click('.writing-mode-button')
     await page.waitForFunction(() => document.querySelector('.writing-mode-button')?.textContent?.trim() === 'Exit writing mode')
+    await new Promise(resolve => setTimeout(resolve, 400))
+    // Full writing mode stays image-free: the chapel scene must be invisible.
+    assert.equal(await page.$eval('.chapel-scene', scene => getComputedStyle(scene).visibility), 'hidden', 'Chapel background still visible in full writing mode')
     await page.screenshot({ path: `artifacts/simplify-qa/${label}-writing.png` })
     const beforeAdvance = await page.$eval('.reference-picker', element => element.textContent || '')
     await page.keyboard.press('ArrowRight')

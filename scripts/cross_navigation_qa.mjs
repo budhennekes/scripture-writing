@@ -62,8 +62,8 @@ try {
     const svg = await (await fetch(new URL('favicon.svg', url))).text()
     assert.ok(!svg.includes('M326 145'), 'Old S favicon still served')
     const sw = await (await fetch(new URL('sw.js', url))).text()
-    assert.match(sw, /v19-cross-identity/)
-    results.push('icons: base-path links, single manifest, icons 200, new favicon served, SW cache v19')
+    assert.match(sw, /v20-chapel-scene-restored/)
+    results.push('icons: base-path links, single manifest, icons 200, new favicon served, SW cache v20')
   }
 
   // 3. Normal reader controls in every relevant state.

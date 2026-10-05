@@ -15,8 +15,8 @@
   --muted: #6d7063;
   --faint: #9a9a8e;
   --line: rgb(72 68 52 / 16%);
-  --accent: #a9702f;
-  --accent-soft: rgb(169 112 47 / 12%);
+  --accent: #8f5f29;
+  --accent-soft: rgb(143 95 41 / 12%);
   --olive: #3c5a41;
   --olive-hover: #314d37;
   --olive-ink: #fffdf7;
@@ -442,6 +442,29 @@ svg {
   color: var(--muted);
   font-size: 13px;
   letter-spacing: 0.04em;
+}
+
+.status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.status-actions button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--page);
+  font: 650 15px/1 'Source Sans 3 Variable', 'Segoe UI', sans-serif;
+}
+
+.status-actions button:first-child {
+  border-color: var(--ink);
+  color: var(--page);
+  background: var(--ink);
 }
 
 .loading-mark {
