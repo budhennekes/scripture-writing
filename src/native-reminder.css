@@ -1,0 +1,41 @@
+.daily-reminder-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.daily-reminder-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted, #6d7067);
+  font-size: 14px;
+}
+
+.daily-reminder-time input {
+  min-height: 42px;
+  border: 1px solid var(--line, #d7d5ca);
+  border-radius: var(--control-radius, 8px);
+  padding: 6px 10px;
+  color: var(--ink, #25251f);
+  background: var(--page, #f7f4eb);
+  font: inherit;
+}
+
+.daily-reminder-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted, #6d7067);
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .daily-reminder-controls {
+    gap: 10px;
+  }
+
+  .daily-reminder-time {
+    font-size: 13px;
+  }
+}
