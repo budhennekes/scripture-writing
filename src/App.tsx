@@ -13,9 +13,11 @@ import './typography-controls.css'
 import './simplify.css'
 import './navigation.css'
 import './reader-scene.css'
+import './native-reminder.css'
 import { BookChapters } from './interactions'
 import { usePanelMotion } from './panel-motion'
 import { importInfo, readImport, storeImport } from './local-bible'
+import { isNativeIOS, isValidReminderTime, loadDailyReminder, reconcileDailyReminder, saveDailyReminder } from './native-reminder'
 
 type Verse = { number: number; text: string }
 type Chapter = { number: number; verses: Verse[] }
@@ -222,6 +224,7 @@ function resolveReference(input: string, bible: Bible): Position | null {
 }
 
 function App() {
+  const nativeIOS = isNativeIOS()
   const saved = useMemo(() => loadSavedState(), [])
   const initialLibrary = useMemo(loadLibrary, [])
   const [personalBible, setPersonalBible] = useState(importInfo)
@@ -253,6 +256,9 @@ function App() {
   const [fontSize, setFontSize] = useState(saved.fontSize ?? 36)
   const [theme, setTheme] = useState<Theme>(saved.theme ?? 'paper')
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(saved.savedPlaces ?? [])
+  const [dailyReminder, setDailyReminder] = useState(loadDailyReminder)
+  const [reminderMessage, setReminderMessage] = useState('')
+  const reminderPermissionRequest = useRef(false)
   const { panel, shownPanel, setPanel } = usePanelMotion()
   const [bookmarkMessage, setBookmarkMessage] = useState(false)
   const [browseTestament, setBrowseTestament] = useState(0)
@@ -261,6 +267,48 @@ function App() {
   const activeVerseRef = useRef<HTMLElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
+
+  const toggleDailyReminder = (enabled: boolean) => {
+    if (!nativeIOS) return
+    const next = { ...dailyReminder, enabled }
+    reminderPermissionRequest.current = enabled
+    saveDailyReminder(next)
+    setDailyReminder(next)
+    setReminderMessage(enabled ? 'Setting up your reminder…' : '')
+  }
+
+  const updateDailyReminderTime = (time: string) => {
+    if (!isValidReminderTime(time)) return
+    const next = { ...dailyReminder, time }
+    saveDailyReminder(next)
+    setDailyReminder(next)
+    setReminderMessage('Updating your reminder…')
+  }
+
+  useEffect(() => {
+    if (!nativeIOS) return
+
+    let cancelled = false
+    const requestPermission = reminderPermissionRequest.current
+    if (dailyReminder.enabled) setReminderMessage('Setting up your reminder…')
+    void reconcileDailyReminder(dailyReminder, requestPermission).then(result => {
+      if (cancelled || result === 'superseded') return
+      reminderPermissionRequest.current = false
+      if (result === 'denied') {
+        setReminderMessage('Allow notifications in iOS Settings to use a daily reminder.')
+        const disabled = { ...dailyReminder, enabled: false }
+        saveDailyReminder(disabled)
+        setDailyReminder(disabled)
+      } else if (result === 'scheduled') {
+        setReminderMessage('Your daily reminder is set on this device.')
+      } else {
+        setReminderMessage('')
+      }
+    }).catch(() => {
+      if (!cancelled) setReminderMessage('The reminder could not be updated. Try again in iOS Settings.')
+    })
+    return () => { cancelled = true }
+  }, [nativeIOS, dailyReminder.enabled, dailyReminder.time])
 
   useEffect(() => {
     let cancelled = false
@@ -825,6 +873,15 @@ function App() {
 
               <div className="settings-group"><div className="setting-copy"><h2>Line guide</h2><p>Mark the line you are copying.</p></div><button className="line-guide-button" type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button></div>
               <div className="settings-group"><div className="setting-copy"><h2>Verses in view</h2><p>Next advances past the displayed verses.</p></div><div className="segmented-control verse-choice" data-selection={versesPerView - 1} role="group" aria-label="Verses in view"><button type="button" className={versesPerView === 1 ? 'selected' : ''} aria-pressed={versesPerView === 1} onClick={() => setVersesPerView(1)}>One</button><button type="button" className={versesPerView === 2 ? 'selected' : ''} aria-pressed={versesPerView === 2} onClick={() => setVersesPerView(2)}>Two</button></div></div>
+              {nativeIOS && <div className="settings-group daily-reminder">
+                <div className="setting-copy"><h2>Daily writing reminder</h2><p>A gentle nudge, scheduled only on this device.</p></div>
+                <div className="daily-reminder-controls">
+                  <button className="line-guide-button" type="button" aria-pressed={dailyReminder.enabled} aria-label={`${dailyReminder.enabled ? 'Turn off' : 'Turn on'} daily writing reminder`} onClick={() => toggleDailyReminder(!dailyReminder.enabled)}>{dailyReminder.enabled ? 'On' : 'Off'}</button>
+                  {dailyReminder.enabled && <label className="daily-reminder-time"><span>Time</span><input type="time" value={dailyReminder.time} onChange={event => updateDailyReminderTime(event.target.value)} aria-label="Daily reminder time" /></label>}
+                </div>
+                {reminderMessage && <p className="daily-reminder-status" role="status">{reminderMessage}</p>}
+              </div>}
+
               <details className="dialog-note">
                 <summary>Keyboard shortcuts</summary>
                 <p>A / D, Space, or arrows move through verses. Press G to choose a passage or B to bookmark.</p>
@@ -844,6 +901,7 @@ function App() {
                 {importBusy && <p role="status">Checking and saving your file…</p>}{importError && <p role="alert">{importError}</p>}
               </details>
               <p className="copyright-note">{bible.translation.notice} {bible.translation.source && <a href={bible.translation.source} target="_blank" rel="noreferrer">Translation source</a>}</p>
+              <p className="copyright-note"><a href={`${import.meta.env.BASE_URL}privacy.html`}>Privacy policy</a></p>
             </section>
           )}
         </div>

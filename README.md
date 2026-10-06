@@ -85,6 +85,20 @@ python3 scripts/data_qa.py
 
 Browser tests use isolated headless Google Chrome instances. Current live-capable suites accept `QA_URL`; persistence QA intentionally exercises localhost migration data. Phone checks simulate viewport and touch behavior, not physical iPhone/Safari hardware.
 
+## iOS app build
+
+The iOS app uses Capacitor and packages the built site locally; it does not load the public website as its app screen. After a successful build and sync, the reader and Scripture files are available in the app bundle for offline use. The optional daily reminder is scheduled locally on the device.
+
+Use Node.js 22 or later, install dependencies, and regenerate the ignored native web resources before opening the Xcode project:
+
+```sh
+npm ci
+npm run cap:sync
+npx cap open ios
+```
+
+`ios/App/App/public/` and Capacitor's generated configuration are build outputs and are intentionally ignored by Git. Run `npm run cap:sync` again whenever web source, content, or assets change; a clean checkout does not contain the bundled web resources until that command runs. In Xcode, choose the `App` scheme and an iPhone simulator for local builds. Signing requires a configured Apple development team and is not needed for simulator builds.
+
 ## Public deployment
 
 Source lives on `main`; compiled static assets are deployed to `gh-pages`. Publishing requires repository access and explicit approval.
