@@ -1,0 +1,24 @@
+.app-shell .writing-tools .native-handwriting-button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--ui-font);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.app-shell .writing-tools .native-handwriting-button:hover {
+  background: color-mix(in srgb, var(--accent-soft) 80%, var(--accent));
+}
+
+@media (max-width: 720px) {
+  .app-shell .writing-tools .native-handwriting-button {
+    min-height: 42px;
+    padding-inline: 10px;
+    font-size: 13px;
+  }
+}

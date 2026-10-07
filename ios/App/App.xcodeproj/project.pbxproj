@@ -16,6 +16,10 @@
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
+		8DFB9032E209966AE24F5A9B /* ScriptureNativePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E2193E669465534811A5FA /* ScriptureNativePlugin.swift */; };
+		2F35643EB6C46F7601A77763 /* BridgeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46FDB35A196D226E29E491F /* BridgeViewController.swift */; };
+		BDCF0FAFB50BC5A2A175F56F /* ScriptureVerseWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A5211E6CAA05D6678D3BEF /* ScriptureVerseWidget.swift */; };
+		9305DF86833A7533067D9F2B /* ScriptureWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 59A50DD07A2C777A7142DA5A /* ScriptureWidget.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy,); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +34,13 @@
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		9582B6822FE993A50072D4E8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		64E2193E669465534811A5FA /* ScriptureNativePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptureNativePlugin.swift; sourceTree = "<group>"; };
+		E46FDB35A196D226E29E491F /* BridgeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeViewController.swift; sourceTree = "<group>"; };
+		06A5211E6CAA05D6678D3BEF /* ScriptureVerseWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptureVerseWidget.swift; sourceTree = "<group>"; };
+		59A50DD07A2C777A7142DA5A /* ScriptureWidget.appex */ = {isa = PBXFileReference; explicitFileType = wrapper.app-extension; includeInIndex = 0; path = ScriptureWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A6AD7E265E1CA134922281BB /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
+		51FDC81BC967C108AB77B088 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5CC947CFDA5A549D237398D6 /* ScriptureWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ScriptureWidget.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,12 +54,25 @@
 		};
 /* End PBXFrameworksBuildPhase section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		C9DD4473E27746CA40498172 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (9305DF86833A7533067D9F2B /* ScriptureWidget.appex in Embed App Extensions */,);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXGroup section */
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
+				F81C0225742C9BF068F01959 /* ScriptureWidget */,
 				504EC3051FED79650016851F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -57,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				504EC3041FED79650016851F /* App.app */,
+				59A50DD07A2C777A7142DA5A /* ScriptureWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -65,6 +90,9 @@
 			isa = PBXGroup;
 			children = (
 				9582B6822FE993A50072D4E8 /* SceneDelegate.swift */,
+				A6AD7E265E1CA134922281BB /* App.entitlements */,
+				E46FDB35A196D226E29E491F /* BridgeViewController.swift */,
+				64E2193E669465534811A5FA /* ScriptureNativePlugin.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
@@ -77,6 +105,16 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		F81C0225742C9BF068F01959 /* ScriptureWidget */ = {
+			isa = PBXGroup;
+			children = (
+				06A5211E6CAA05D6678D3BEF /* ScriptureVerseWidget.swift */,
+				51FDC81BC967C108AB77B088 /* Info.plist */,
+				5CC947CFDA5A549D237398D6 /* ScriptureWidget.entitlements */,
+			);
+			path = ScriptureWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -87,10 +125,12 @@
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
+				C9DD4473E27746CA40498172 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				5967AF42E73B3110CA500AE2 /* PBXTargetDependency ScriptureWidget */,
 			);
 			name = App;
 			packageProductDependencies = (
@@ -99,6 +139,17 @@
 			productName = App;
 			productReference = 504EC3041FED79650016851F /* App.app */;
 			productType = "com.apple.product-type.application";
+		};
+		5540ED4D3EE97C71512BDCFB /* ScriptureWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FACDDD7BF7C0583B3389A773 /* Build configuration list for PBXNativeTarget "ScriptureWidget" */;
+			buildPhases = (E41EFA6FE6D4B648B28BE58F /* Sources */, FA9DC64F93C1F214BD3AB623 /* Frameworks */, 545AC10A35EDC61D62797C82 /* Resources */,);
+			buildRules = ();
+			dependencies = ();
+			name = ScriptureWidget;
+			productName = ScriptureWidget;
+			productReference = 59A50DD07A2C777A7142DA5A /* ScriptureWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -109,10 +160,20 @@
 				LastSwiftUpdateCheck = 0920;
 				LastUpgradeCheck = 0920;
 				TargetAttributes = {
+					5540ED4D3EE97C71512BDCFB = {
+						CreatedOnToolsVersion = 16.0;
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {enabled = 1;};
+						};
+					};
 					504EC3031FED79650016851F = {
 						CreatedOnToolsVersion = 9.2;
 						LastSwiftMigration = 1100;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {enabled = 1;};
+						};
 					};
 				};
 			};
@@ -133,6 +194,7 @@
 			projectRoot = "";
 			targets = (
 				504EC3031FED79650016851F /* App */,
+				5540ED4D3EE97C71512BDCFB /* ScriptureWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -153,6 +215,10 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+		E41EFA6FE6D4B648B28BE58F /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (BDCF0FAFB50BC5A2A175F56F /* ScriptureVerseWidget.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+		FA9DC64F93C1F214BD3AB623 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		545AC10A35EDC61D62797C82 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+
 /* Begin PBXSourcesBuildPhase section */
 		504EC3001FED79650016851F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -160,6 +226,8 @@
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */,
+				2F35643EB6C46F7601A77763 /* BridgeViewController.swift in Sources */,
+				8DFB9032E209966AE24F5A9B /* ScriptureNativePlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,6 +251,14 @@
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
+
+/* Begin PBXContainerItemProxy section */
+		999A0BB9E01BEAC5939A6888 /* PBXContainerItemProxy */ = {isa = PBXContainerItemProxy; containerPortal = 504EC2FC1FED79650016851F /* Project object */; proxyType = 1; remoteGlobalIDString = 5540ED4D3EE97C71512BDCFB; remoteInfo = ScriptureWidget; };
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		5967AF42E73B3110CA500AE2 /* PBXTargetDependency ScriptureWidget */ = {isa = PBXTargetDependency; target = 5540ED4D3EE97C71512BDCFB /* ScriptureWidget */; targetProxy = 999A0BB9E01BEAC5939A6888 /* PBXContainerItemProxy */; };
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		504EC3141FED79650016851F /* Debug */ = {
@@ -299,6 +375,7 @@
 			baseConfigurationReference = 958DCC722DB07C7200EA8C5F /* debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = App/Info.plist;
@@ -321,6 +398,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = App/Info.plist;
@@ -338,6 +416,38 @@
 			};
 			name = Release;
 		};
+		00EBAED2CAAAC1ECD690D233 /* ScriptureWidget Debug */ = {isa = XCBuildConfiguration; buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = ScriptureWidget/ScriptureWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ScriptureWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../../Frameworks",);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.scripturebyhand.app.ScriptureWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			}; name = Debug; };
+		A04E1C16DE4961D5FDBF1EE8 /* ScriptureWidget Release */ = {isa = XCBuildConfiguration; buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = ScriptureWidget/ScriptureWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ScriptureWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../../Frameworks",);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.scripturebyhand.app.ScriptureWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			}; name = Release; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -359,6 +469,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		FACDDD7BF7C0583B3389A773 /* Build configuration list for PBXNativeTarget "ScriptureWidget" */ = {isa = XCConfigurationList; buildConfigurations = (00EBAED2CAAAC1ECD690D233 /* ScriptureWidget Debug */, A04E1C16DE4961D5FDBF1EE8 /* ScriptureWidget Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
