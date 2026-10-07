@@ -14,10 +14,12 @@ import './simplify.css'
 import './navigation.css'
 import './reader-scene.css'
 import './native-reminder.css'
+import './native-features.css'
 import { BookChapters } from './interactions'
 import { usePanelMotion } from './panel-motion'
 import { importInfo, readImport, storeImport } from './local-bible'
 import { isNativeIOS, isValidReminderTime, loadDailyReminder, reconcileDailyReminder, saveDailyReminder } from './native-reminder'
+import { openNativeHandwriting, syncNativeVerseWidget } from './native-scripture'
 
 type Verse = { number: number; text: string }
 type Chapter = { number: number; verses: Verse[] }
@@ -258,6 +260,7 @@ function App() {
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>(saved.savedPlaces ?? [])
   const [dailyReminder, setDailyReminder] = useState(loadDailyReminder)
   const [reminderMessage, setReminderMessage] = useState('')
+  const [nativeFeatureMessage, setNativeFeatureMessage] = useState('')
   const reminderPermissionRequest = useRef(false)
   const { panel, shownPanel, setPanel } = usePanelMotion()
   const [bookmarkMessage, setBookmarkMessage] = useState(false)
@@ -284,6 +287,20 @@ function App() {
     setDailyReminder(next)
     setReminderMessage('Updating your reminder…')
   }
+
+  useEffect(() => {
+    if (!nativeIOS || !bible) return
+    const currentBook = bible.books[position.book]
+    const currentChapter = currentBook?.chapters[position.chapter]
+    const currentVerse = currentChapter?.verses[position.verse]
+    if (!currentBook || !currentChapter || !currentVerse) return
+    void syncNativeVerseWidget({
+      reference: `${currentBook.name} ${currentChapter.number}:${currentVerse.number}`,
+      text: currentVerse.text,
+    }).catch(() => {
+      // Widget refresh is optional and does not interrupt reading or writing.
+    })
+  }, [nativeIOS, bible, position])
 
   useEffect(() => {
     if (!nativeIOS) return
@@ -642,9 +659,15 @@ function App() {
         </button>
         <div className="writing-tools">
           <span className="writing-reference"><button className="reference-picker" type="button" onClick={openNavigator} aria-haspopup="dialog" aria-label="Choose passage or translation"><span className="picker-copy"><span>{getReference(bible, position)} · {translation === 'ASV1901' ? 'ASV' : translation.startsWith('LOCAL_') ? 'Local' : translation}{randomReturn ? ' · Random' : ''}</span><span className="picker-label">Choose a passage</span></span><ChevronDownIcon /></button></span>
+          {nativeIOS && <button type="button" className="native-handwriting-button" onClick={() => {
+            setNativeFeatureMessage('')
+            void openNativeHandwriting({ reference: getReference(bible, position), text: currentVerse.text }).catch(() => {
+              setNativeFeatureMessage('The handwriting studio could not be opened. Please try again.')
+            })
+          }}>Write by hand</button>}
           <button type="button" className="writing-mode-button" aria-pressed={focusWriting} onClick={focusWriting ? exitWriting : enterWriting}>{focusWriting ? 'Exit writing mode' : 'Enter writing mode'}</button>
           <button type="button" className="icon-button setup-button" onClick={() => setPanel('settings')} aria-label="Open settings"><SettingsIcon /></button>
-          {positionNotice && <span role="status">{positionNotice}</span>}
+          {(positionNotice || nativeFeatureMessage) && <span role="status">{positionNotice || nativeFeatureMessage}</span>}
 
         </div>
         <div className="scripture-wrap">
@@ -873,6 +896,7 @@ function App() {
 
               <div className="settings-group"><div className="setting-copy"><h2>Line guide</h2><p>Mark the line you are copying.</p></div><button className="line-guide-button" type="button" aria-pressed={lineGuide} onClick={() => { setLineGuide(!lineGuide); setGuideTop(null) }}>Line guide</button></div>
               <div className="settings-group"><div className="setting-copy"><h2>Verses in view</h2><p>Next advances past the displayed verses.</p></div><div className="segmented-control verse-choice" data-selection={versesPerView - 1} role="group" aria-label="Verses in view"><button type="button" className={versesPerView === 1 ? 'selected' : ''} aria-pressed={versesPerView === 1} onClick={() => setVersesPerView(1)}>One</button><button type="button" className={versesPerView === 2 ? 'selected' : ''} aria-pressed={versesPerView === 2} onClick={() => setVersesPerView(2)}>Two</button></div></div>
+              {nativeIOS && <div className="settings-group"><div className="setting-copy"><h2>Home Screen verse</h2><p>Add the Scripture by Hand widget from your Home Screen’s widget gallery. It follows the verse you’re reading.</p></div></div>}
               {nativeIOS && <div className="settings-group daily-reminder">
                 <div className="setting-copy"><h2>Daily writing reminder</h2><p>A gentle nudge, scheduled only on this device.</p></div>
                 <div className="daily-reminder-controls">
